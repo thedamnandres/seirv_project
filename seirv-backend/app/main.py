@@ -1,0 +1,47 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.config.settings import settings
+from app.database.base import engine, Base
+from app.views import auth
+
+# Crear las tablas en la base de datos
+Base.metadata.create_all(bind=engine)
+
+# Crear la aplicación FastAPI
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
+    description="Sistema de Evaluación del Índice de Riesgo Vehicular",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+# Configurar CORS (
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Incluir routers
+app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
+
+
+@app.get("/")
+def root():
+    """Endpoint raíz"""
+    return {
+        "message": "SEIRV API - Sistema de Evaluación del Índice de Riesgo Vehicular",
+        "version": settings.VERSION,
+        "docs": "/docs",
+        "status": "online"
+    }
+
+
+@app.get("/health")
+def health_check():
+    """Health check"""
+    return {"status": "healthy"}
