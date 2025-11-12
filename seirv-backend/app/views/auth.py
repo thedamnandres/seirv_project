@@ -7,6 +7,7 @@ from app.models.user import User, UserRole
 from app.schemas.user import UserCreate, UserLogin, Token, UserResponse
 from app.services.auth_service import AuthService
 from app.config.settings import settings
+from app.utils.dependencies import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -72,7 +73,7 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
     # Crear token JWT
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = AuthService.create_access_token(
-        data={"sub": user.id},
+        data={"sub": str(user.id)},  # Convertir a string
         expires_delta=access_token_expires
     )
     
