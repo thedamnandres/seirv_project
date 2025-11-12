@@ -45,6 +45,24 @@ class UserLogin(BaseModel):
     password: str
 
 
+class UserUpdate(BaseModel):
+    """
+    Schema para ACTUALIZAR datos del usuario
+    """
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = Field(None, min_length=2, max_length=100)
+    password: Optional[str] = Field(None, min_length=8, max_length=100)
+
+    @validator('password')
+    def validate_password_strength(cls, v):
+        if v is not None:
+            if not any(c.isupper() for c in v):
+                raise ValueError('La contraseña debe contener al menos una mayúscula')
+            if not any(c.isdigit() for c in v):
+                raise ValueError('La contraseña debe contener al menos un número')
+        return v
+
+
 class UserResponse(UserBase):
     """
     Schema de RESPUESTA
