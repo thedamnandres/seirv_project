@@ -7,34 +7,12 @@ class VehicleBase(BaseModel):
     """
     Schema base de vehículo
     """
-    make: str = Field(
-        ..., 
-        min_length=2, 
-        max_length=50,
-        description="Marca del vehículo (ej: Honda, Toyota)"
-    )
-    model: str = Field(
-        ..., 
-        min_length=2, 
-        max_length=50,
-        description="Modelo del vehículo (ej: Civic, Camry)"
-    )
-    year: int = Field(
-        ..., 
-        ge=1990,
-        description="Año del vehículo (mínimo 1990)"
-    )
-    mileage: int = Field(
-        ..., 
-        ge=0, 
-        le=500000,
-        description="Kilometraje del vehículo (0-500,000 km)"
-    )
-    category_id: int = Field(
-        ..., 
-        gt=0,
-        description="ID de la categoría del vehículo"
-    )
+    make: str = Field(..., min_length=2, max_length=50, description="Marca del vehículo (ej: Honda, Toyota)")
+    model: str = Field(..., min_length=2, max_length=50, description="Modelo del vehículo (ej: Civic, Camry)")
+    year: int = Field(..., ge=1990, description="Año del vehículo (mínimo 1990)")
+    mileage: int = Field(..., ge=0, le=500000, description="Kilometraje del vehículo (0-500,000 km)")
+    license_plate: str = Field(..., min_length=7, max_length=8, description="Placa ecuatoriana (ABC-123 o ABC-1234)")
+    category_id: int = Field(..., gt=0, description="ID de la categoría del vehículo")
     
     @validator('make', 'model')
     def normalize_text(cls, v):
@@ -45,11 +23,27 @@ class VehicleBase(BaseModel):
             return v.strip().title()
         return v
     
+    @validator('license_plate')
+    def validate_license_plate(cls, v):
+        """
+        Valida formato de placa ecuatoriana: ABC-1234 o ABC-123
+        """
+        import re
+        if not v:
+            raise ValueError('La placa es requerida')
+        
+        # Normalizar: quitar espacios y convertir a mayúsculas
+        plate = v.strip().upper().replace(" ", "")
+        
+        # Validar formato ecuatoriano: ABC-1234 o ABC-123
+        pattern = r'^[A-Z]{3}-\d{3,4}$'
+        if not re.match(pattern, plate):
+            raise ValueError('Formato de placa inválido. Debe ser ABC-1234 o ABC-123 (ej: PDS-434)')
+        
+        return plate
+
     @validator('year')
     def validate_year_range(cls, v):
-        """
-        Valida que el año esté en el rango correcto
-        """
         from datetime import datetime
         current_year = datetime.now().year
         
@@ -130,6 +124,7 @@ class VehicleListResponse(BaseModel):
     make: str
     model: str
     year: int
+    license_plate: str
     mileage: int
     irv_value: float = 0.0
     irv_level: str = "N/A"

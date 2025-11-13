@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, CheckConstraint
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database.base import Base
@@ -8,9 +8,6 @@ from datetime import datetime
 class Vehicle(Base):
     """
     Modelo de Vehículo
-
-    VALIDACIONES:
-    - Datos de NHTSA verificados antes de crear
     """
     __tablename__ = "vehicles"
     
@@ -22,6 +19,7 @@ class Vehicle(Base):
     make = Column(String(50), nullable=False)
     model = Column(String(50), nullable=False)
     year = Column(Integer, nullable=False)
+    license_plate = Column(String(8), nullable=False, index=True)  
     mileage = Column(Integer, nullable=False)
     
     # IRV (futuro)
@@ -37,6 +35,7 @@ class Vehicle(Base):
     __table_args__ = (
         CheckConstraint('mileage >= 0 AND mileage <= 500000', name='check_mileage_range'),
         CheckConstraint(f'year >= 1990 AND year <= {datetime.now().year + 1}', name='check_year_range'),
+        UniqueConstraint('license_plate', name='unique_license_plate'),  # Placa única en todo el sistema
     )
     
     user = relationship("User", back_populates="vehicles")

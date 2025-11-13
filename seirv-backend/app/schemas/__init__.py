@@ -20,6 +20,15 @@ from app.schemas.vehicle import (
     VehicleDetailResponse
 )
 
+from app.schemas.vehicle_catalog import (
+    VehicleCatalogCreate,
+    VehicleCatalogResponse,
+    MakeResponse,
+    YearResponse,
+    ModelResponse,
+    DropdownResponse
+)
+
 __all__ = [
     # User
     "UserCreate",
@@ -27,7 +36,7 @@ __all__ = [
     "UserUpdate",
     "UserResponse",
     "Token",
-    "TokenData"
+    "TokenData",
 
     # Category
     "CategoryResponse",
@@ -38,5 +47,13 @@ __all__ = [
     "VehicleUpdate",
     "VehicleResponse",
     "VehicleListResponse",
-    "VehicleDetailResponse"
+    "VehicleDetailResponse",
+
+    # Vehicle Catalog
+    "VehicleCatalogCreate",
+    "VehicleCatalogResponse",
+    "MakeResponse",
+    "YearResponse",
+    "ModelResponse",
+    "DropdownResponse"
 ]

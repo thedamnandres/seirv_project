@@ -1,5 +1,8 @@
-from app.views import auth
+from app.views import auth, users, vehicles, vehicle_catalog
 
 __all__ = [
-    "auth"
+    "auth",
+    "users",
+    "vehicles",
+    "vehicle_catalog"
 ]
