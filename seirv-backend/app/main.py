@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.settings import settings
 from app.database.base import engine, Base
-from app.views import auth
+from app.views import auth, users, vehicles, vehicle_catalog
 
 # Crear las tablas en la base de datos
 Base.metadata.create_all(bind=engine)
@@ -17,7 +17,7 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Configurar CORS (
+# Configurar CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
@@ -28,6 +28,9 @@ app.add_middleware(
 
 # Incluir routers
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
+app.include_router(users.router, prefix=settings.API_V1_PREFIX)
+app.include_router(vehicles.router, prefix=settings.API_V1_PREFIX)
+app.include_router(vehicle_catalog.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
