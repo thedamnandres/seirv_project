@@ -14,6 +14,22 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from app.database.base import SessionLocal
 from app.models.vehicle_catalog import VehicleCatalog
 
+# CONFIGURACIÓN: Marcas permitidas (dejar vacío [] para importar todas)
+ALLOWED_MAKES = [
+    'TOYOTA',
+    'CHEVROLET',
+    'NISSAN',
+    'FORD',
+    'HYUNDAI',
+    'KIA',
+    'MAZDA',
+    'HONDA',
+    'VOLKSWAGEN',
+    'RENAULT',
+    'BMW',
+    'SUZUKI'
+]
+
 
 def import_catalog(csv_path: str):
     """Importa el catálogo desde CSV"""
@@ -22,10 +38,20 @@ def import_catalog(csv_path: str):
     total_rows = 0
     added = 0
     skipped = 0
+    skipped_by_make = 0
     errors = 0
 
     print(f"\nIMPORTACIÓN DE CATÁLOGO NHTSA")
-    print(f"Archivo: {csv_path}\n")
+    print(f"Archivo: {csv_path}")
+    
+    if ALLOWED_MAKES:
+        print(f"Filtro activo: Solo {len(ALLOWED_MAKES)} marcas permitidas")
+        print(f"Marcas: {', '.join(ALLOWED_MAKES[:5])}")
+        if len(ALLOWED_MAKES) > 5:
+            print(f"        ... y {len(ALLOWED_MAKES) - 5} más")
+    else:
+        print("Sin filtro: Importando TODAS las marcas")
+    print()
 
     try:
         with open(csv_path, 'r', encoding='utf-8') as f:
@@ -64,6 +90,11 @@ def import_catalog(csv_path: str):
 
                     if year < 1990 or year > 2030:
                         skipped += 1
+                        continue
+
+                    # Filtro por marca
+                    if ALLOWED_MAKES and make not in ALLOWED_MAKES:
+                        skipped_by_make += 1
                         continue
 
                     # Verificar duplicado en BD
@@ -112,10 +143,12 @@ def import_catalog(csv_path: str):
 
             print("\nRESUMEN IMPORTACIÓN")
             print("-------------------")
-            print(f"Filas procesadas: {total_rows}")
-            print(f"Importados:       {added}")
-            print(f"Omitidos:         {skipped}")
-            print(f"Errores:          {errors}")
+            print(f"Filas procesadas:     {total_rows}")
+            print(f"Importados:           {added}")
+            print(f"Omitidos (validación): {skipped}")
+            if ALLOWED_MAKES:
+                print(f"Omitidos (marca):     {skipped_by_make}")
+            print(f"Errores:              {errors}")
 
             print("\nESTADO DEL CATÁLOGO")
             print("-------------------")
@@ -136,7 +169,7 @@ def import_catalog(csv_path: str):
 
 
 if __name__ == "__main__":
-    default_csv = "/code/data/nhtsa_catalog.csv"
+    default_csv = "/code/data/RCL_FROM_2020_2024_final.csv"
     csv_path = sys.argv[1] if len(sys.argv) > 1 else default_csv
 
     print("\n🚀 Iniciando importación...\n")

@@ -65,10 +65,12 @@ class AuthService:
     @staticmethod
     def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
         """
-        Autentica un usuario
+        Autentica un usuario usando username o email
         """
-        # Buscar usuario en BD
-        user = db.query(User).filter(User.username == username).first()
+        # Buscar usuario por username o email
+        user = db.query(User).filter(
+            (User.username == username) | (User.email == username)
+        ).first()
         
         if not user:
             return None
