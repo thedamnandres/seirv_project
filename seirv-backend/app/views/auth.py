@@ -37,13 +37,19 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     # Hashear la contraseña
     hashed_password = AuthService.hash_password(user_data.password)
     
+    user_count = db.query(User).count()
+    if user_count == 0:
+        role = UserRole.ADMIN
+    else:
+        role = UserRole.USER
+
     # Crear el usuario
     new_user = User(
         email=user_data.email,
         username=user_data.username,
         full_name=user_data.full_name,
         hashed_password=hashed_password,
-        role=UserRole.USER,  # Por defecto es USER (no ADMIN)
+        role=role,
         is_active=True
     )
     

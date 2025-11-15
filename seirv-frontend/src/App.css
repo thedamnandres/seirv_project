@@ -1,42 +1,454 @@
+/* ========= RESET SIMPLE ========= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* el root ocupa toda la pantalla */
 #root {
-  max-width: 1280px;
+  min-height: 100vh;
+}
+
+/* contenedor principal de la app (envolvente en App.jsx) */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========= NAVBAR ========= */
+
+.navbar {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.navbar-inner {
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0.7rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-logo {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-right: 0.75rem;
+}
+
+.nav-link {
+  font-size: 0.9rem;
+  color: #374151;
+  text-decoration: none;
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+}
+
+.nav-link:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.navbar-user {
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+/* ========= DASHBOARD ========= */
+
+.dashboard-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.dashboard-header {
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-greeting {
+  font-size: 2rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.dashboard-subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.dashboard-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.4rem 1.6rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.dashboard-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.dashboard-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  font-size: 1.4rem;
+}
+
+.dashboard-card-title {
+  font-weight: 600;
+}
+
+.dashboard-card-text {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.dashboard-card-link {
+  margin-top: auto;
+  font-size: 0.9rem;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.dashboard-card-link:hover {
+  text-decoration: underline;
+}
+
+/* ========= MIS VEHÍCULOS ========= */
+
+.vehicles-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.vehicles-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.vehicles-header h1 {
+  margin: 0;
+}
+
+/* botones genéricos */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: #ffffff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.btn-outline:hover {
+  background: #eff6ff;
+}
+
+.btn-danger {
+  background: #dc2626;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-sm {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.8rem;
+}
+
+/* estados vacío / carga */
+
+.empty-state {
+  border-radius: 16px;
+  padding: 3rem 1.5rem;
   text-align: center;
+  background: #f9fafb;
+  border: 1px dashed #e5e7eb;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
+/* loading */
+
+.loading {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #2563eb;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* alerts */
+
+.alert {
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
 }
 
-.card {
-  padding: 2em;
+.alert-error {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
-.read-the-docs {
-  color: #888;
+/* grid de vehículos */
+
+.vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.vehicle-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.vehicle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.vehicle-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.vehicle-year {
+  font-size: 0.85rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.vehicle-info {
+  margin-top: 0.25rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  padding: 0.2rem 0;
+}
+
+.info-item .label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.info-item .value {
+  font-weight: 600;
+  color: #111827;
+}
+
+.vehicle-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* badges IRV */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-bajo {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.badge-medio {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+.badge-alto {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* ========= FORMULARIO VEHÍCULO ========= */
+
+.vehicle-form-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.form-container {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.8rem 2rem;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12);
+}
+
+.form-container h1 {
+  margin: 0 0 0.25rem 0;
+}
+
+.form-subtitle {
+  margin: 0 0 1.5rem 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.vehicle-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.form-section h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.form-group input,
+.form-group select {
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.3);
+}
+
+.form-group small {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+
+.dashboard-badge-soon {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #2563eb; /* azul */
+  color: #fff;
 }
