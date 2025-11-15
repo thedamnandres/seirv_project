@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { vehicleService, categoryService } from '../services/api';
+import { vehicleService } from '../services/api';
 import { vehicleCatalogService } from '../services/vehicleCatalog';
 
 export default function VehicleForm() {
@@ -24,24 +24,22 @@ export default function VehicleForm() {
   const [loading, setLoading] = useState(false);
 
   // Cargar marcas y categorías al inicio
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const [makesData, categoriesData] = await Promise.all([
-          vehicleCatalogService.getMakes(),
-          categoryService.getDropdown(),
-        ]);
+useEffect(() => {
+  const loadInitialData = async () => {
+    try {
+      // Usamos el endpoint que YA existe
+      const data = await vehicleCatalogService.getDropdown();
 
-        setMakes(makesData || []);
-        setCategories(categoriesData || []);
-      } catch (err) {
-        console.error(err);
-        setError('Error al cargar datos iniciales del formulario');
-      }
-    };
-
-    loadInitialData();
-  }, []);
+      // data: { makes, models, years, categories }
+      setMakes(data.makes || []);
+      setCategories(data.categories || []);
+    } catch (err) {
+      console.error(err);
+      setError('Error al cargar datos iniciales del formulario');
+    }
+  };
+  loadInitialData();
+}, []);
 
   // Handlers para selects en cascada
   const handleMakeChange = async (e) => {
@@ -258,7 +256,7 @@ export default function VehicleForm() {
                   </option>
                 ))}
               </select>
-              <small>Las categorías vienen desde el backend (no están quemadas).</small>
+              <small>Las categorías se cargan automáticamente desde el catálogo del sistema.</small>
             </div>
           </section>
 

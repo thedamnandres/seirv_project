@@ -1,163 +1,155 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import distinct
-from typing import List, Optional
+from typing import List, Dict
 
 from app.database.base import get_db
 from app.models.vehicle_catalog import VehicleCatalog
-from app.schemas.vehicle_catalog import (
-    MakeResponse,
-    YearResponse,
-    ModelResponse,
-    DropdownResponse
-)
+from app.models.category import Category
 
 router = APIRouter(prefix="/catalog", tags=["Vehicle Catalog"])
 
 
 @router.get("/makes", response_model=List[str])
-def get_available_makes(
-    year: Optional[int] = Query(None, description="Filtrar marcas por año"),
-    db: Session = Depends(get_db)
-):
+def get_makes(db: Session = Depends(get_db)):
     """
-    Obtener lista de marcas disponibles
+    Devuelve la lista de marcas disponibles en el catálogo.
     """
-    query = db.query(distinct(VehicleCatalog.make))
-    
-    if year:
-        query = query.filter(VehicleCatalog.year == year)
-    
-    makes = query.order_by(VehicleCatalog.make).all()
-    
-    return [make[0] for make in makes]
-
-
-@router.get("/years", response_model=List[int])
-def get_available_years(
-    make: Optional[str] = Query(None, description="Filtrar años por marca"),
-    db: Session = Depends(get_db)
-):
-    """
-    Obtener lista de años disponibles
-    
-    Si se proporciona 'make', retorna solo años disponibles para esa marca
-    """
-    query = db.query(distinct(VehicleCatalog.year))
-    
-    if make:
-        query = query.filter(VehicleCatalog.make == make)
-    
-    years = query.order_by(VehicleCatalog.year.desc()).all()
-    
-    return [year[0] for year in years]
+    rows = (
+        db.query(VehicleCatalog.make)
+        .distinct()
+        .order_by(VehicleCatalog.make)
+        .all()
+    )
+    return [r[0] for r in rows]
 
 
 @router.get("/models", response_model=List[str])
-def get_available_models(
-    make: str = Query(..., description="Marca del vehículo (requerida)"),
-    year: Optional[int] = Query(None, description="Año del vehículo"),
-    db: Session = Depends(get_db)
+def get_models(
+    make: str = Query(..., description="Marca del vehículo"),
+    db: Session = Depends(get_db),
 ):
     """
-    Obtener lista de modelos disponibles
-    
-    Requiere 'make' (marca)
-    Opcionalmente filtra por 'year'
+    Devuelve la lista de modelos disponibles para una marca dada.
+    Se llama como: /api/v1/catalog/models?make=BMW
     """
-    query = db.query(distinct(VehicleCatalog.model)).filter(
-        VehicleCatalog.make == make
+    rows = (
+        db.query(VehicleCatalog.model)
+        .filter(VehicleCatalog.make == make)
+        .distinct()
+        .order_by(VehicleCatalog.model)
+        .all()
     )
-    
-    if year:
-        query = query.filter(VehicleCatalog.year == year)
-    
-    models = query.order_by(VehicleCatalog.model).all()
-    
-    return [model[0] for model in models]
+
+    # Si no hay modelos, simplemente devolvemos lista vacía
+    return [r[0] for r in rows]
 
 
-@router.get("/dropdown", response_model=DropdownResponse)
-def get_dropdown_data(
-    make: Optional[str] = Query(None, description="Marca seleccionada"),
-    year: Optional[int] = Query(None, description="Año seleccionado"),
-    db: Session = Depends(get_db)
+@router.get("/years", response_model=List[int])
+def get_years(
+    make: str = Query(..., description="Marca del vehículo"),
+    model: str = Query(..., description="Modelo del vehículo"),
+    db: Session = Depends(get_db),
 ):
     """
-    Obtener datos completos para dropdowns en cascada
-    
-    Casos de uso:
-    1. Sin parámetros: retorna todas las marcas y años
-    2. Con 'make': retorna años y modelos para esa marca
-    3. Con 'make' y 'year': retorna modelos para esa marca y año
-    
-    Ejemplo de flujo:
-    - Usuario selecciona marca → obtener años y modelos para esa marca
-    - Usuario selecciona año → refinar modelos para marca + año
+    Devuelve la lista de años disponibles para una marca+modelo.
+    Se llama como: /api/v1/catalog/years?make=BMW&model=X5
     """
-    response = {
-        "makes": [],
-        "years": [],
-        "models": []
-    }
-    
-    # Caso 1: Sin filtros - retornar todas las marcas y años
-    if not make and not year:
-        makes = db.query(distinct(VehicleCatalog.make)).order_by(VehicleCatalog.make).all()
-        years = db.query(distinct(VehicleCatalog.year)).order_by(VehicleCatalog.year.desc()).all()
-        
-        response["makes"] = [m[0] for m in makes]
-        response["years"] = [y[0] for y in years]
-        
-    # Caso 2: Solo marca seleccionada
-    elif make and not year:
-        # Años disponibles para esta marca
-        years = db.query(distinct(VehicleCatalog.year)).filter(
-            VehicleCatalog.make == make
-        ).order_by(VehicleCatalog.year.desc()).all()
-        
-        # Todos los modelos de esta marca (sin filtro de año aún)
-        models = db.query(distinct(VehicleCatalog.model)).filter(
-            VehicleCatalog.make == make
-        ).order_by(VehicleCatalog.model).all()
-        
-        response["years"] = [y[0] for y in years]
-        response["models"] = [m[0] for m in models]
-        
-    # Caso 3: Marca y año seleccionados
-    elif make and year:
-        # Modelos específicos para marca + año
-        models = db.query(distinct(VehicleCatalog.model)).filter(
+    rows = (
+        db.query(VehicleCatalog.year)
+        .filter(
             VehicleCatalog.make == make,
-            VehicleCatalog.year == year
-        ).order_by(VehicleCatalog.model).all()
-        
-        response["models"] = [m[0] for m in models]
-    
-    return response
+            VehicleCatalog.model == model,
+        )
+        .distinct()
+        .order_by(VehicleCatalog.year)
+        .all()
+    )
+    return [r[0] for r in rows]
+
+
+@router.get("/dropdown")
+def get_dropdown(db: Session = Depends(get_db)):
+    """
+    Devuelve todos los datos de catálogo necesarios para el formulario:
+    - makes: lista de marcas
+    - models: dict marca -> [modelos]
+    - years: dict "marca|modelo" -> [años]
+    - categories: lista de categorías de riesgo (id, name)
+    """
+    # Marcas
+    makes_rows = (
+        db.query(VehicleCatalog.make)
+        .distinct()
+        .order_by(VehicleCatalog.make)
+        .all()
+    )
+    makes = [r[0] for r in makes_rows]
+
+    # Modelos por marca
+    models_by_make: Dict[str, List[str]] = {}
+    for make in makes:
+        model_rows = (
+            db.query(VehicleCatalog.model)
+            .filter(VehicleCatalog.make == make)
+            .distinct()
+            .order_by(VehicleCatalog.model)
+            .all()
+        )
+        models_by_make[make] = [m[0] for m in model_rows]
+
+    # Años por marca+modelo
+    years_by_make_model: Dict[str, List[int]] = {}
+    for make in makes:
+        for model in models_by_make[make]:
+            year_rows = (
+                db.query(VehicleCatalog.year)
+                .filter(
+                    VehicleCatalog.make == make,
+                    VehicleCatalog.model == model,
+                )
+                .distinct()
+                .order_by(VehicleCatalog.year)
+                .all()
+            )
+            years_by_make_model[f"{make}|{model}"] = [y[0] for y in year_rows]
+
+    # Categorías desde la tabla categories
+    categories_rows = (
+        db.query(Category)
+        .order_by(Category.name.asc())
+        .all()
+    )
+    categories_payload = [
+        {"id": c.id, "name": c.name}
+        for c in categories_rows
+    ]
+
+    return {
+        "makes": makes,
+        "models": models_by_make,
+        "years": years_by_make_model,
+        "categories": categories_payload,
+    }
 
 
 @router.get("/validate")
 def validate_vehicle(
-    make: str = Query(..., description="Marca del vehículo"),
-    model: str = Query(..., description="Modelo del vehículo"),
-    year: int = Query(..., description="Año del vehículo"),
-    db: Session = Depends(get_db)
+    make: str = Query(...),
+    model: str = Query(...),
+    year: int = Query(...),
+    db: Session = Depends(get_db),
 ):
     """
-    Validar que un vehículo específico existe en el catálogo
-    
-    Útil antes de crear un vehículo en el sistema
+    Valida que una combinación marca+modelo+año exista en el catálogo.
     """
-    vehicle_exists = db.query(VehicleCatalog).filter(
-        VehicleCatalog.make == make,
-        VehicleCatalog.model == model,
-        VehicleCatalog.year == year
-    ).first()
-    
-    return {
-        "exists": vehicle_exists is not None,
-        "make": make,
-        "model": model,
-        "year": year
-    }
+    exists = (
+        db.query(VehicleCatalog)
+        .filter(
+            VehicleCatalog.make == make,
+            VehicleCatalog.model == model,
+            VehicleCatalog.year == year,
+        )
+        .first()
+        is not None
+    )
+    return {"is_valid": exists}

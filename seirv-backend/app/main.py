@@ -8,7 +8,6 @@ from app.views import auth, users, vehicles, vehicle_catalog
 # Crear las tablas en la base de datos
 Base.metadata.create_all(bind=engine)
 
-# Crear la aplicación FastAPI
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
@@ -17,7 +16,6 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Configurar CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
@@ -26,7 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir routers
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(users.router, prefix=settings.API_V1_PREFIX)
 app.include_router(vehicles.router, prefix=settings.API_V1_PREFIX)
@@ -35,7 +32,6 @@ app.include_router(vehicle_catalog.router, prefix=settings.API_V1_PREFIX)
 
 @app.get("/")
 def root():
-    """Endpoint raíz"""
     return {
         "message": "SEIRV API - Sistema de Evaluación del Índice de Riesgo Vehicular",
         "version": settings.VERSION,
@@ -46,5 +42,4 @@ def root():
 
 @app.get("/health")
 def health_check():
-    """Health check"""
     return {"status": "healthy"}

@@ -1,57 +1,28 @@
-const API_BASE = 'http://localhost:8000/api/v1';
+// services/vehicleCatalog.js
+import { apiClient } from './api'; // mismo axios con el token
 
-
-// Servicios de Catálogo de Vehículos (NHTSA)
 export const vehicleCatalogService = {
-  // Obtener todas las marcas únicas
-  getMakes: async () => {
-    const res = await fetch(`${API_BASE}/catalog/makes`);
-
-    if (!res.ok) {
-      throw new Error('Error al cargar las marcas');
-    }
-
-    return res.json();
+  async getMakes() {
+    const res = await apiClient.get('/catalog/makes');
+    return res.data;
   },
 
-  // Obtener modelos por marca
-  getModels: async (make) => {
-    const res = await fetch(
-      `${API_BASE}/catalog/models?make=${encodeURIComponent(make)}`
-    );
-
-    if (!res.ok) {
-      throw new Error('Error al cargar los modelos');
-    }
-
-    return res.json();
+  async getModels(make) {
+    const res = await apiClient.get('/catalog/models', {
+      params: { make },
+    });
+    return res.data;
   },
 
-  // Obtener años por marca y modelo
-  getYears: async (make, model) => {
-    const params = new URLSearchParams({
-      make,
-      model,
-    }).toString();
-
-    const res = await fetch(`${API_BASE}/catalog/years?${params}`);
-
-    if (!res.ok) {
-      throw new Error('Error al cargar los años');
-    }
-
-    return res.json();
+  async getYears(make, model) {
+    const res = await apiClient.get('/catalog/years', {
+      params: { make, model },
+    });
+    return res.data;
   },
 
-  // Buscar vehículos con filtros (si algún día lo usas)
-  search: async (filters = {}) => {
-    const params = new URLSearchParams(filters).toString();
-    const res = await fetch(`${API_BASE}/catalog/search?${params}`);
-
-    if (!res.ok) {
-      throw new Error('Error al buscar en el catálogo');
-    }
-
-    return res.json();
+  async getDropdown() {
+    const res = await apiClient.get('/catalog/dropdown');
+    return res.data;   // { makes, models, years, categories }
   },
 };
