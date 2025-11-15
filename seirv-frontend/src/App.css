@@ -30,36 +30,110 @@ body {
 .navbar {
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .navbar-inner {
-  max-width: 1120px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0.7rem 1.5rem;
+  padding: 0.9rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 60px;
 }
 
-.navbar-left,
+@media (min-width: 768px) {
+  .navbar-inner {
+    padding: 1rem 2rem;
+    min-height: 64px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar-inner {
+    padding: 1.1rem 2.5rem;
+    min-height: 68px;
+  }
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 2rem;
+  margin-left: auto;
+  padding-left: 2rem;
 }
 
 .navbar-logo {
   font-weight: 700;
   font-size: 1rem;
-  margin-right: 0.75rem;
+  margin-right: 2rem;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .navbar-logo {
+    font-size: 1.1rem;
+    margin-right: 3rem;
+  }
+  
+  .navbar-left {
+    gap: 2rem;
+  }
+  
+  .navbar-right {
+    gap: 2.5rem;
+    padding-left: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar-logo {
+    font-size: 1.25rem;
+    margin-right: 4rem;
+  }
+  
+  .navbar-left {
+    gap: 2.5rem;
+  }
+  
+  .navbar-right {
+    gap: 3rem;
+    padding-left: 4rem;
+  }
 }
 
 .nav-link {
   font-size: 0.9rem;
   color: #374151;
   text-decoration: none;
-  padding: 0.25rem 0.45rem;
+  padding: 0.5rem 1rem;
   border-radius: 999px;
+  transition: background 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+  margin-right: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .nav-link {
+    font-size: 0.95rem;
+    padding: 0.55rem 1.1rem;
+    margin-right: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nav-link {
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+  }
 }
 
 .nav-link:hover {
@@ -67,26 +141,120 @@ body {
   color: #1d4ed8;
 }
 
+.navbar-user-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  margin-right: 1rem;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.navbar-user-container:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.navbar-user-icon {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .navbar-user {
   font-size: 0.9rem;
-  color: #4b5563;
+  color: #374151;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .navbar-user-container {
+    padding: 0.55rem 1.1rem;
+    margin-right: 1.5rem;
+    gap: 0.6rem;
+  }
+  
+  .navbar-user-icon {
+    font-size: 1.1rem;
+  }
+  
+  .navbar-user {
+    font-size: 0.95rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar-user-container {
+    padding: 0.6rem 1.25rem;
+    margin-right: 2rem;
+    gap: 0.75rem;
+  }
+  
+  .navbar-user-icon {
+    font-size: 1.2rem;
+  }
+  
+  .navbar-user {
+    font-size: 1rem;
+  }
 }
 
 /* ========= DASHBOARD ========= */
 
 .dashboard-page {
-  max-width: 1120px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
+}
+
+@media (min-width: 768px) {
+  .dashboard-page {
+    padding: 2.5rem 2rem 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-page {
+    padding: 3rem 2.5rem 4rem;
+  }
 }
 
 .dashboard-header {
   margin-bottom: 1.5rem;
 }
 
+@media (min-width: 768px) {
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-header {
+    margin-bottom: 2.5rem;
+  }
+}
+
 .dashboard-greeting {
   font-size: 2rem;
   margin: 0 0 0.25rem 0;
+}
+
+@media (min-width: 768px) {
+  .dashboard-greeting {
+    font-size: 2.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-greeting {
+    font-size: 2.5rem;
+  }
 }
 
 .dashboard-subtitle {
@@ -97,9 +265,34 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   margin-top: 1.5rem;
+}
+
+/* Tablets: 2 columnas */
+@media (min-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Pantallas grandes: máximo 2 columnas con mejor espaciado */
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    max-width: 900px;
+  }
+}
+
+/* Pantallas muy grandes: mantener 2 columnas pero con más espacio */
+@media (min-width: 1440px) {
+  .dashboard-grid {
+    max-width: 1000px;
+    gap: 2.5rem;
+  }
 }
 
 .dashboard-card {
@@ -110,6 +303,18 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+@media (min-width: 1024px) {
+  .dashboard-card {
+    padding: 1.8rem 2rem;
+  }
 }
 
 .dashboard-card-header {
@@ -154,9 +359,21 @@ body {
 /* ========= MIS VEHÍCULOS ========= */
 
 .vehicles-page {
-  max-width: 1120px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
+}
+
+@media (min-width: 768px) {
+  .vehicles-page {
+    padding: 2.5rem 2rem 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .vehicles-page {
+    padding: 3rem 2.5rem 4rem;
+  }
 }
 
 .vehicles-header {
@@ -212,8 +429,15 @@ body {
 }
 
 .btn-sm {
-  padding: 0.35rem 0.9rem;
-  font-size: 0.8rem;
+  padding: 0.4rem 0.95rem;
+  font-size: 0.85rem;
+}
+
+@media (min-width: 768px) {
+  .btn-sm {
+    padding: 0.45rem 1rem;
+    font-size: 0.9rem;
+  }
 }
 
 /* estados vacío / carga */
@@ -273,8 +497,31 @@ body {
 
 .vehicles-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1.25rem;
+}
+
+/* Tablets: 2 columnas */
+@media (min-width: 768px) {
+  .vehicles-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Pantallas grandes: 3 columnas */
+@media (min-width: 1024px) {
+  .vehicles-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+/* Pantallas muy grandes: mantener 3 columnas con más espacio */
+@media (min-width: 1440px) {
+  .vehicles-grid {
+    gap: 2rem;
+  }
 }
 
 .vehicle-card {
@@ -367,6 +614,19 @@ body {
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
+}
+
+@media (min-width: 768px) {
+  .vehicle-form-page {
+    padding: 2.5rem 2rem 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .vehicle-form-page {
+    padding: 3rem 2.5rem 4rem;
+    max-width: 950px;
+  }
 }
 
 .form-container {

@@ -30,9 +30,12 @@ export default function Navbar() {
         <div className="navbar-right">
           {isAuthenticated && (
             <>
-              <span className="navbar-user">
-                {user?.full_name || user?.username}
-              </span>
+              <div className="navbar-user-container">
+                <span className="navbar-user-icon">👤</span>
+                <span className="navbar-user">
+                  {user?.full_name || user?.username}
+                </span>
+              </div>
               <button type="button" className="btn btn-outline btn-sm" onClick={handleLogout}>
                 Cerrar sesión
               </button>
