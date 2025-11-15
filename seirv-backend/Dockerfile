@@ -15,8 +15,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el código
 COPY . .
 
+# Copiar entrypoint y dar permisos de ejecución
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Exponer puerto
 EXPOSE 8000
 
-# Comando para ejecutar
+# Usar el entrypoint para hacer la carga inicial y luego lanzar Uvicorn
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Comando que ejecutará el entrypoint al final
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

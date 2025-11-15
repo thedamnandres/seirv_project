@@ -45,6 +45,19 @@ services:
     networks:
       - seirv_network
 
+  frontend:
+    build:
+      context: ./seirv-frontend
+      dockerfile: Dockerfile
+    container_name: seirv-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - seirv_network
+
 volumes:
   postgres_data:
     driver: local
