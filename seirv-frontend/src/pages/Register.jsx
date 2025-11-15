@@ -1,89 +1,112 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import InputField from "../components/InputField";
-import axios from "axios";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import './auth.scss';
 
 export default function Register() {
-  const [fullName, setFullName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const navigate = useNavigate();
+  const { register } = useAuth();
 
-  const handleRegister = async () => {
+  const [formData, setFormData] = useState({
+    full_name: '',
+    username: '',
+    email: '',
+    password: '',
+  });
+
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      const payload = {
-        full_name: fullName,
-        username: username,
-        email: email,
-        password: password,
-      };
-
-      console.log("Enviando:", payload);
-
-      const response = await axios.post(
-        "http://localhost:8000/api/v1/auth/register",
-        payload
-      );
-
-      console.log("Registro exitoso:", response.data);
-
-      alert("Usuario creado correctamente!");
-      navigate("/"); 
-    } catch (error) {
-      console.error("Error al registrar:", error);
-
-      if (error.response?.data?.detail) {
-        alert("Error: " + error.response.data.detail);
-      } else {
-        alert("No se pudo registrar. Revisa el backend.");
-      }
+      await register(formData);       // usa /api/v1/auth/register
+      navigate('/login');
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Error al registrar usuario';
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="card-container">
-      <h1 className="title">Crear Cuenta</h1>
-      <p className="subtitle">Regístrate en el Sistema SEIRV</p>
+    <div className="auth-wrapper">
+      <div className="auth-container">
+        <h1 className="auth-title">Crear Cuenta</h1>
+        <p className="auth-subtitle">Regístrate en el Sistema SEIRV</p>
 
-      <InputField
-        label="Nombre Completo"
-        type="text"
-        placeholder="Ej: Juan Pérez"
-        value={fullName}
-        onChange={(e) => setFullName(e.target.value)}
-      />
+        {error && <div className="auth-error">{error}</div>}
 
-      <InputField
-        label="Usuario"
-        type="text"
-        placeholder="ej: juanperez"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Nombre Completo</label>
+            <input
+              name="full_name"
+              type="text"
+              placeholder="Ej: Juan Pérez"
+              value={formData.full_name}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      <InputField
-        label="Email"
-        type="email"
-        placeholder="tu@email.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+          <div className="form-group">
+            <label>Usuario</label>
+            <input
+              name="username"
+              type="text"
+              placeholder="Ej: juanperez"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      <InputField
-        label="Contraseña"
-        type="password"
-        placeholder="Mínimo 6 caracteres y una mayúscula"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              name="email"
+              type="email"
+              placeholder="correo@ejemplo.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      <button onClick={handleRegister}>Registrarse</button>
+          <div className="form-group">
+            <label>Contraseña</label>
+            <input
+              name="password"
+              type="password"
+              placeholder="Mínimo 6 caracteres"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      <Link to="/" className="link">
-        ¿Ya tienes cuenta? Inicia sesión
-      </Link>
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Registrando...' : 'Registrarse'}
+          </button>
+        </form>
+
+        <p className="auth-switch">
+          ¿Ya tienes cuenta?{' '}
+          <Link to="/login">Inicia sesión</Link>
+        </p>
+      </div>
     </div>
   );
 }

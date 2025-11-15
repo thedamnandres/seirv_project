@@ -1,63 +1,86 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import InputField from "../components/InputField";
-import axios from "axios";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import './auth.scss';
 
 export default function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = async () => {
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+  });
+
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      const payload = {
-        username: username,
-        password: password,
-      };
-
-      const response = await axios.post(
-        "http://localhost:8000/api/v1/auth/login",
-        payload
-      );
-
-      const token = response.data.access_token;
-
-      // Guardar token
-      localStorage.setItem("token", token);
-
-      // Redirigir al dashboard
-      navigate("/dashboard");
-
-    } catch (error) {
-      console.error("Error al iniciar sesión:", error);
-      alert("Credenciales incorrectas");
+      await login(formData);          // usa /api/v1/auth/login
+      navigate('/dashboard');         // va al dashboard
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Credenciales incorrectas';
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="card-container">
-      <h1 className="title">Iniciar Sesión</h1>
-      <p className="subtitle">Bienvenido al Sistema SEIRV</p>
+    <div className="auth-wrapper">
+      <div className="auth-container">
+        <h1 className="auth-title">Iniciar Sesión</h1>
+        <p className="auth-subtitle">Bienvenido al Sistema SEIRV</p>
 
-      <InputField
-        label="Usuario"
-        type="text"
-        placeholder="tu usuario"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
+        {error && <div className="auth-error">{error}</div>}
 
-      <InputField
-        label="Contraseña"
-        type="password"
-        placeholder="tu contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Usuario</label>
+            <input
+              name="username"
+              type="text"
+              placeholder="Ingresa tu usuario"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      <button onClick={handleLogin}>Ingresar</button>
+          <div className="form-group">
+            <label>Contraseña</label>
+            <input
+              name="password"
+              type="password"
+              placeholder="Ingresa tu contraseña"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      <Link to="/register" className="link">¿No tienes cuenta? Crear una cuenta</Link>
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Ingresando...' : 'Ingresar'}
+          </button>
+        </form>
+
+        <p className="auth-switch">
+          ¿No tienes cuenta?{' '}
+          <Link to="/register">Crear cuenta</Link>
+        </p>
+      </div>
     </div>
   );
 }
