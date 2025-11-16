@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
@@ -9,14 +9,14 @@ import Vehicles from './pages/Vehicles';
 import VehicleForm from './pages/VehicleForm';
 import './App.css';
 
-function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <div className="app">
-          <Navbar />
+function AppContent() {
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
-          <Routes>
+  return (
+    <div className="app">
+      {!isAuthPage && <Navbar />}
+      <Routes>
             {/* primera vista → login */}
             <Route path="/" element={<Navigate to="/login" />} />
 
@@ -54,8 +54,16 @@ function App() {
 
             {/* fallback */}
             <Route path="*" element={<Navigate to="/login" />} />
-          </Routes>
-        </div>
+      </Routes>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <AppContent />
       </AuthProvider>
     </Router>
   );
