@@ -17,4 +17,6 @@ WORKDIR /app
 RUN npm install -g serve
 COPY --from=builder /app/dist ./dist
 EXPOSE 3000
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# -s flag enables SPA mode (redirects all routes to index.html)
+# --single flag is an alias for -s
+CMD ["serve", "-s", "dist", "-l", "3000", "--no-clipboard"]
