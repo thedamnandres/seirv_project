@@ -3,7 +3,11 @@ import { createContext, useContext, useEffect, useState } from 'react';
 const AuthContext = createContext(null);
 
 // Usar variable de entorno o default a localhost para desarrollo
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const getApiBase = () => {
+  const url = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+  return url.endsWith('/') ? url.slice(0, -1) : url;
+};
+const API_BASE = getApiBase();
 
 
 function saveAuthData(token, user) {

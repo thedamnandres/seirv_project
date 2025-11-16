@@ -2,7 +2,12 @@
 import axios from 'axios';
 
 // Usar variable de entorno o default a localhost para desarrollo
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+// Remover barra final si existe para evitar dobles barras en las URLs
+const getApiBaseUrl = () => {
+  const url = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+  return url.endsWith('/') ? url.slice(0, -1) : url;
+};
+const API_BASE_URL = getApiBaseUrl();
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
