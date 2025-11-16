@@ -2,8 +2,8 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 const AuthContext = createContext(null);
 
-// Puedes ajustar esta base si usas proxy, pero /api/v1 suele ir bien
-const API_BASE = 'http://localhost:8000/api/v1';
+// Usar variable de entorno o default a localhost para desarrollo
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 
 function saveAuthData(token, user) {
