@@ -48,20 +48,20 @@ export default function Dashboard() {
           </div>
         </article>
 
-        {/* Recalls - Próximamente */}
+        {/* Recalls */}
         <article className="dashboard-card">
           <div className="dashboard-card-header">
             <div className="dashboard-card-icon">🔔</div>
             <div>
-              <div className="dashboard-card-title">
-                Recalls
-                <span className="dashboard-badge-soon">Próximamente</span>
-              </div>
+              <div className="dashboard-card-title">Recalls</div>
               <p className="dashboard-card-text">
                 Consulta los recalls y alertas de seguridad de tus vehículos.
               </p>
             </div>
           </div>
+          <Link to="/recalls" className="dashboard-card-link">
+            Ver recalls
+          </Link>
         </article>
 
         {/* Mi Perfil - Próximamente */}

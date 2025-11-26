@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, validator
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -140,3 +140,28 @@ class VehicleDetailResponse(VehicleResponse):
     Schema detallado con información completa
     """
     pass
+
+
+class RecallItem(BaseModel):
+    """
+    Schema para un recall individual de NHTSA
+    """
+    NHTSACampaignNumber: Optional[str] = None
+    Component: Optional[str] = None
+    Summary: Optional[str] = None
+    Consequence: Optional[str] = None
+    Remedy: Optional[str] = None
+    ReportReceivedDate: Optional[str] = None
+    Manufacturer: Optional[str] = None
+
+
+class VehicleRecallsResponse(BaseModel):
+    """
+    Schema de respuesta con recalls de un vehículo
+    """
+    vehicle_id: int
+    make: str
+    model: str
+    year: int
+    total_recalls: int
+    recalls: List[RecallItem] = []

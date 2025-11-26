@@ -2,11 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Vehicles from './pages/Vehicles';
 import VehicleForm from './pages/VehicleForm';
+import Recalls from './pages/Recalls';
+import UsersManagement from './pages/UsersManagement';
 import './App.css';
 
 function AppContent() {
@@ -14,9 +17,9 @@ function AppContent() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
   return (
-    <div className="app">
+        <div className="app">
       {!isAuthPage && <Navbar />}
-      <Routes>
+          <Routes>
             {/* primera vista → login */}
             <Route path="/" element={<Navigate to="/login" />} />
 
@@ -52,10 +55,29 @@ function AppContent() {
               }
             />
 
+            <Route
+              path="/recalls"
+              element={
+                <PrivateRoute>
+                  <Recalls />
+                </PrivateRoute>
+              }
+            />
+
+            {/* ruta de administración - solo para admin */}
+            <Route
+              path="/admin/users"
+              element={
+                <AdminRoute>
+                  <UsersManagement />
+                </AdminRoute>
+              }
+            />
+
             {/* fallback */}
             <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
-    </div>
+          </Routes>
+        </div>
   );
 }
 

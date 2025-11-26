@@ -25,7 +25,10 @@ services:
       dockerfile: Dockerfile
     container_name: seirv-backend
     restart: always
-    working_dir: /code 
+    working_dir: /code
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       DATABASE_URL: ${DATABASE_URL}
       SECRET_KEY: ${SECRET_KEY}

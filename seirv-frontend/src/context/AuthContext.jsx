@@ -19,7 +19,16 @@ function loadUserFromStorage() {
   const stored = localStorage.getItem('user');
   if (!stored) return null;
   try {
-    return JSON.parse(stored);
+    const user = JSON.parse(stored);
+    // Normalizar el rol si viene del localStorage
+    if (user && user.role) {
+      let roleValue = user.role;
+      if (typeof roleValue === 'object' && roleValue !== null && 'value' in roleValue) {
+        roleValue = roleValue.value;
+      }
+      user.role = String(roleValue).toLowerCase().trim();
+    }
+    return user;
   } catch {
     return null;
   }
@@ -53,14 +62,30 @@ export const AuthProvider = ({ children }) => {
 
         if (res.ok) {
           const data = await res.json();
-          // asumo que el backend devuelve info del usuario aquí
+          
+          // Normalizar el rol a string si viene como enum
+          if (data.role) {
+            let roleValue = data.role;
+            
+            // Si es un objeto, intentar obtener el value
+            if (typeof roleValue === 'object' && roleValue !== null) {
+              if ('value' in roleValue) {
+                roleValue = roleValue.value;
+              }
+            }
+            
+            // Convertir a string y normalizar
+            data.role = String(roleValue).toLowerCase().trim();
+          }
+          
           setUser(data);
           localStorage.setItem('user', JSON.stringify(data));
         } else {
           clearAuthData();
           setUser(null);
         }
-      } catch {
+      } catch (error) {
+        console.error('Error al obtener usuario desde /auth/me:', error);
         // si falla, sigue con lo que haya en localStorage
       } finally {
         setLoading(false);
@@ -97,7 +122,22 @@ const login = async ({ username, password }) => {
   // el backend te devuelve exactamente esto:
   // { access_token, token_type, user: { ... } }
   const token = data.access_token;
-  const userData = data.user;
+  let userData = data.user;
+
+  // Normalizar el rol a string si viene como enum
+  if (userData && userData.role) {
+    let roleValue = userData.role;
+    
+    // Si es un objeto, intentar obtener el value
+    if (typeof roleValue === 'object' && roleValue !== null) {
+      if ('value' in roleValue) {
+        roleValue = roleValue.value;
+      }
+    }
+    
+    // Convertir a string y normalizar
+    userData.role = String(roleValue).toLowerCase().trim();
+  }
 
   if (token) {
     localStorage.setItem('access_token', token);
@@ -145,11 +185,38 @@ const register = async ({ full_name, username, email, password }) => {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data);
+        localStorage.setItem('user', JSON.stringify(data));
+      } else {
+        clearAuthData();
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Error al refrescar usuario:', error);
+    }
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
+    refreshUser,
     isAuthenticated: !!user,
     loading,
   };

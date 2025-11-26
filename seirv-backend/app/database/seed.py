@@ -4,12 +4,12 @@ from app.models.category import Category
 default_categories = [
     {"name": "Sedán", "description": "Vehículos de pasajeros de 4 puertas"},
     {"name": "SUV", "description": "Vehículos utilitarios deportivos"},
-    {"name": "Camioneta", "description": "Vehículos de carga"},
-    {"name": "Hatchback", "description": "Vehículos compactos"},
-    {"name": "Coupé", "description": "Vehículos deportivos de 2 puertas"},
-    {"name": "Minivan", "description": "Vehículos familiares"},
+    {"name": "Crossover", "description": "SUVs compactos urbanos"},
+    {"name": "Hatchback", "description": "Compactos y subcompactos"},
+    {"name": "Van", "description": "Vehículos comerciales"},
+    {"name": "Lujo", "description": "Vehículos premium/ejecutivos"},
     {"name": "Pickup", "description": "Camionetas pickup"},
-    {"name": "Convertible", "description": "Vehículos con techo retráctil"},
+    {"name": "Deportivo", "description": "Alto rendimiento"},
 ]
 
 def seed_categories(db: Session):

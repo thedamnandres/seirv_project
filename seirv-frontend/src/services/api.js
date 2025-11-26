@@ -33,4 +33,28 @@ export const vehicleService = {
   async delete(id) {
     await apiClient.delete(`/vehicles/${id}`);
   },
+  async getRecalls(vehicleId) {
+    const res = await apiClient.get(`/vehicles/${vehicleId}/recalls`);
+    return res.data;
+  },
+};
+
+export const userService = {
+  async getAll(skip = 0, limit = 100) {
+    const res = await apiClient.get('/users/admin/all', {
+      params: { skip, limit }
+    });
+    return res.data;
+  },
+  async getById(id) {
+    const res = await apiClient.get(`/users/admin/${id}`);
+    return res.data;
+  },
+  async update(id, payload) {
+    const res = await apiClient.put(`/users/admin/${id}`, payload);
+    return res.data;
+  },
+  async delete(id) {
+    await apiClient.delete(`/users/admin/${id}`);
+  },
 };

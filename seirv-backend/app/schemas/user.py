@@ -74,6 +74,37 @@ class UserResponse(UserBase):
     is_active: bool
     created_at: datetime
     
+    @validator('role', pre=True)
+    def normalize_role(cls, v):
+        """Convierte enum a string si es necesario"""
+        if v is None:
+            return None
+        # Si es un enum, obtener el value
+        if hasattr(v, 'value'):
+            result = str(v.value).lower().strip()
+            return result
+        # Si ya es string, asegurarse de que esté en minúsculas y sin espacios
+        result = str(v).lower().strip()
+        return result
+    
+    @classmethod
+    def from_orm_user(cls, user):
+        """Método helper para convertir un User ORM a UserResponse"""
+        role_value = user.role
+        if hasattr(role_value, 'value'):
+            role_value = role_value.value
+        role_str = str(role_value).lower().strip()
+        
+        return cls(
+            id=user.id,
+            email=user.email,
+            username=user.username,
+            full_name=user.full_name,
+            role=role_str,
+            is_active=user.is_active,
+            created_at=user.created_at
+        )
+    
     class Config:
         from_attributes = True  # Convertir desde SQLAlchemy models
 
@@ -88,3 +119,46 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     """Datos que van dentro del token JWT"""
     user_id: Optional[int] = None
+
+
+class AdminUserUpdate(BaseModel):
+    """
+    Schema para que el ADMIN actualice usuarios
+    Permite cambiar: role, is_active, email, full_name
+    """
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = Field(None, min_length=2, max_length=100)
+    role: Optional[str] = Field(None, description="Rol del usuario: 'admin' o 'user'")
+    is_active: Optional[bool] = None
+    
+    @validator('role')
+    def validate_role(cls, v):
+        if v is not None and v not in ['admin', 'user']:
+            raise ValueError('El rol debe ser "admin" o "user"')
+        return v
+
+
+class AdminUserListResponse(BaseModel):
+    """
+    Schema para listar usuarios en el admin
+    """
+    id: int
+    email: str
+    username: str
+    full_name: str
+    role: str
+    is_active: bool
+    created_at: datetime
+    total_vehicles: int = 0  # Número de vehículos del usuario
+    
+    class Config:
+        from_attributes = True
+
+
+class AdminUserDetailResponse(UserResponse):
+    """
+    Schema detallado de usuario para admin
+    Incluye información adicional
+    """
+    total_vehicles: int = 0
+    updated_at: Optional[datetime] = None

@@ -93,6 +93,11 @@ class NHTSAService:
                 status_code=status.HTTP_504_GATEWAY_TIMEOUT,
                 detail="Timeout al consultar la API de NHTSA. Intenta nuevamente."
             )
+        except httpx.ConnectError as e:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="No se pudo conectar con la API de NHTSA. Verifica tu conexión a internet o intenta más tarde."
+            )
         except httpx.HTTPError as e:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,

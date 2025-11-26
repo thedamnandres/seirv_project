@@ -11,7 +11,8 @@ from app.schemas.vehicle import (
     VehicleUpdate,
     VehicleResponse,
     VehicleListResponse,
-    VehicleDetailResponse
+    VehicleDetailResponse,
+    VehicleRecallsResponse
 )
 from app.utils.dependencies import get_current_user
 from app.services.nhtsa_service import NHTSAService
@@ -228,3 +229,80 @@ def delete_vehicle(
     db.commit()
     
     return None
+
+
+@router.get("/{vehicle_id}/recalls", response_model=VehicleRecallsResponse)
+async def get_vehicle_recalls(
+    vehicle_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Obtener recalls (llamados a revisión) de NHTSA para un vehículo
+    
+    Consulta en tiempo real la API oficial de NHTSA (National Highway Traffic Safety Administration)
+    para obtener todos los recalls activos del vehículo según su marca, modelo y año.
+    
+    **Ejemplo de uso:**
+    - GET /api/v1/vehicles/2/recalls
+    
+    **Retorna:**
+    - Lista de recalls con número de campaña, componente afectado, resumen, consecuencias y remedio
+    - Total de recalls encontrados
+    - Información del vehículo consultado
+    
+    **Casos de uso:**
+    - Verificar si un vehículo tiene problemas de seguridad conocidos antes de comprarlo
+    - Revisar recalls pendientes de un vehículo en tu flota
+    - Evaluar el nivel de riesgo de un vehículo específico
+    """
+    # Verificar que el vehículo existe y pertenece al usuario
+    vehicle = db.query(Vehicle).filter(
+        Vehicle.id == vehicle_id,
+        Vehicle.user_id == current_user.id
+    ).first()
+    
+    if not vehicle:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Vehículo no encontrado"
+        )
+    
+    # Consultar recalls desde NHTSA
+    try:
+        recalls_data = await NHTSAService.fetch_recalls(
+            make=vehicle.make,
+            model=vehicle.model,
+            year=vehicle.year
+        )
+        
+        # Mapear los campos relevantes de cada recall
+        recalls_list = []
+        for recall in recalls_data:
+            recalls_list.append({
+                "NHTSACampaignNumber": recall.get("NHTSACampaignNumber"),
+                "Component": recall.get("Component"),
+                "Summary": recall.get("Summary"),
+                "Consequence": recall.get("Consequence"),
+                "Remedy": recall.get("Remedy"),
+                "ReportReceivedDate": recall.get("ReportReceivedDate"),
+                "Manufacturer": recall.get("Manufacturer")
+            })
+        
+        return {
+            "vehicle_id": vehicle.id,
+            "make": vehicle.make,
+            "model": vehicle.model,
+            "year": vehicle.year,
+            "total_recalls": len(recalls_list),
+            "recalls": recalls_list
+        }
+        
+    except HTTPException:
+        # Re-lanzar excepciones HTTP (404, timeouts, etc)
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al obtener recalls: {str(e)}"
+        )

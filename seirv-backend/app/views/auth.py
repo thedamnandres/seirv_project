@@ -79,14 +79,17 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
     # Crear token JWT
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = AuthService.create_access_token(
-        data={"sub": str(user.id)},  # Convertir a string
+        data={"sub": str(user.id)},
         expires_delta=access_token_expires
     )
+    
+    # Convertir el usuario a UserResponse usando el método helper que garantiza la serialización correcta del rol
+    user_response = UserResponse.from_orm_user(user)
     
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user": user
+        "user": user_response
     }
 
 
@@ -97,7 +100,9 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
     
     Esta ruta está PROTEGIDA. Solo funciona con un token válido.
     """
-    return current_user
+    # Convertir explícitamente a UserResponse usando el método helper que garantiza la serialización correcta del rol
+    user_response = UserResponse.from_orm_user(current_user)
+    return user_response
 
 
 # Importar la dependency
