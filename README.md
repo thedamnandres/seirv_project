@@ -76,7 +76,7 @@ docker-compose exec backend python -m app.scripts.import_nhtsa_catalog /code/dat
 5. Ingresa la placa (formato ecuatoriano: ABC-123 o ABC-1234)
 
 **Producción:**  
-La aplicación está desplegada en: **https://seirv-frontend.onrender.com/login**
+La aplicación está desplegada en: **https://seirv-frontend.onrender.com**
 
 La API valida formato, normaliza la placa y previene duplicados.
 
