@@ -110,12 +110,8 @@ const login = async ({ username, password }) => {
   // Normalizar el rol usando la utilidad
   if (userData) userData.role = normalizeRole(userData.role);
 
-  if (token) {
-    localStorage.setItem('access_token', token);
-  }
-  if (userData) {
-    localStorage.setItem('user', JSON.stringify(userData));
-  }
+  // Guardar token y usuario usando helper
+  saveAuthData(token, userData);
 
   setUser(userData);
 };
