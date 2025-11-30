@@ -1,17 +1,12 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Loading from './Loading';
 import { normalizeRole } from '../utils/user';
 
 export default function AdminRoute({ children }) {
   const { isAuthenticated, loading, user } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner" />
-      </div>
-    );
-  }
+  if (loading) return <Loading />;
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Loading from '../components/Loading';
 import { Link } from 'react-router-dom';
 import { vehicleService } from '../services/api';
 
@@ -36,13 +37,7 @@ export default function Vehicles() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner" />
-      </div>
-    );
-  }
+  if (loading) return <Loading />;
 
   return (
     <div className="vehicles-page">

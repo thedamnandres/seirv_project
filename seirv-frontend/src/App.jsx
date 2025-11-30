@@ -1,15 +1,17 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
+import Loading from './components/Loading';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Vehicles from './pages/Vehicles';
-import VehicleForm from './pages/VehicleForm';
-import Recalls from './pages/Recalls';
-import UsersManagement from './pages/UsersManagement';
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Vehicles = lazy(() => import('./pages/Vehicles'));
+const VehicleForm = lazy(() => import('./pages/VehicleForm'));
+const Recalls = lazy(() => import('./pages/Recalls'));
+const UsersManagement = lazy(() => import('./pages/UsersManagement'));
 import './App.css';
 
 function AppContent() {
@@ -19,6 +21,7 @@ function AppContent() {
   return (
         <div className="app">
       {!isAuthPage && <Navbar />}
+          <Suspense fallback={<Loading />}>
           <Routes>
             {/* primera vista → login */}
             <Route path="/" element={<Navigate to="/login" />} />
@@ -77,6 +80,7 @@ function AppContent() {
             {/* fallback */}
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
+          </Suspense>
         </div>
   );
 }

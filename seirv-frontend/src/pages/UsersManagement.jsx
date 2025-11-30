@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { userService } from '../services/api';
+import Loading from '../components/Loading';
 import './UsersManagement.scss';
 
 export default function UsersManagement() {
@@ -101,13 +102,7 @@ export default function UsersManagement() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner" />
-      </div>
-    );
-  }
+  if (loading) return <Loading />;
 
   return (
     <div className="vehicles-page">
