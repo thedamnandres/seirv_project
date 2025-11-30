@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { normalizeRole } from '../utils/user';
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Detección de admin - normalizar a lowercase string
-  const isAdmin = user?.role && String(user.role).toLowerCase().trim() === 'admin';
+  // Detección de admin - usar util para normalizar
+  const isAdmin = normalizeRole(user?.role) === 'admin';
 
   const handleLogout = () => {
     logout();
