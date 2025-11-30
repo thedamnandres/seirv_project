@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+// Importaciones ligeras — no usamos useEffect aquí
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { normalizeRole } from '../utils/user';
