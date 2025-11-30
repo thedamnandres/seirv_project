@@ -1,0 +1,111 @@
+.users-page .alert-error.custom-alert,
+.users-page .alert-success.custom-alert {
+  margin-bottom: 1rem;
+}
+
+.users-table-wrapper {
+  overflow-x: auto;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.users-table thead tr {
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.users-table th,
+.users-table td {
+  padding: 1rem;
+  text-align: left;
+  color: #374151;
+}
+
+.users-table td.center {
+  text-align: center;
+}
+
+.users-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.users-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.users-modal h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.users-modal .form-group {
+  margin-bottom: 1rem;
+}
+
+.users-modal .modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.users-page .custom-alert {
+  margin-bottom: 1rem;
+}
+
+.alert-success-custom {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.users-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #111827;
+}
+.user-sub {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+.user-email { color: #374151; }
+.user-vehicles { color: #374151; font-weight: 600; }
+.actions-container { display:flex; gap: 0.5rem; justify-content:center; }
+
+.modal-input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+
+.checkbox-label { display:flex; align-items:center; gap: 0.5rem; cursor:pointer; }
+.checkbox-text { font-weight: 600; color: #4b5563; }
+
+.users-table th { font-weight: 600; }
+.users-table th.center, .users-table td.center { text-align: center; }
