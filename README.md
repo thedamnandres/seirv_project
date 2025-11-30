@@ -58,6 +58,40 @@ Ejecuta el seed de categorías:
 docker-compose exec backend python -m app.scripts.seed_categories
 ```
 
+### Nota sobre el error "env: 'bash\r': No such file or directory"
+
+Si ves este error al arrancar el contenedor del backend:
+
+- Causa: normalmente indica que el archivo `entrypoint.sh` tiene finales de línea Windows (CRLF) y el shebang (`#!/usr/bin/env bash`) termina con un CR (`\r`) que provoca el fallo dentro del contenedor Linux.
+- Soluciones rápidas:
+	- Forzar LF en el repositorio (ya viene incluido `.gitattributes` en este proyecto) y normalizar:
+
+```bash
+# Renormaliza todos los archivos según .gitattributes
+git add --renormalize .
+git commit -m "Normalize line endings"
+```
+
+	- Si no quieres tocar git, puedes convertir manualmente el script y reconstruir la imagen:
+
+```powershell
+# En Windows con WSL o Git Bash: dos2unix seirv-backend/entrypoint.sh
+dos2unix seirv-backend/entrypoint.sh
+
+# Después, reconstruye el contenedor:
+docker-compose down -v
+docker-compose up --build --force-recreate -d
+```
+
+	- Otra opción (Windows PowerShell) sin herramientas adicionales:
+
+```powershell
+(Get-Content .\\seirv-backend\\entrypoint.sh) -replace "\r" | Set-Content .\\seirv-backend\\entrypoint.sh -NoNewline
+docker-compose down -v; docker-compose up --build --force-recreate -d
+```
+
+Después de esto el contenedor debe dejar de mostrar `env: 'bash\r'` y arrancar correctamente.
+
 *(Opcional)* Importar catálogo de vehículos desde CSV:
 
 ```bash

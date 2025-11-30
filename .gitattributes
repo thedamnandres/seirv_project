@@ -1,0 +1,6 @@
+# Forced line endings for shell scripts to avoid CRLF issues in containers
+*.sh text eol=lf
+
+# Other useful standardizations
+*.py text eol=lf
+*.md text eol=lf
