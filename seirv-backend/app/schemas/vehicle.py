@@ -99,9 +99,10 @@ class VehicleResponse(VehicleBase):
     id: int
     user_id: int
     
-    # IRV (por ahora en 0, futuro cálculo)
-    irv_value: float = 0.0
-    irv_level: str = "N/A"
+    # IRV (Índice de Riesgo Vehicular)
+    irv_value: float = 0.0  # IRV normalizado (0-100)
+    irv_raw: Optional[float] = None  # IRV crudo (para referencia)
+    irv_level: str = "N/A"  # Nivel: Sin Recalls, Bajo, Medio, Alto
     last_irv_calculation: Optional[datetime] = None
     
     # Timestamps
@@ -139,7 +140,8 @@ class VehicleDetailResponse(VehicleResponse):
     """
     Schema detallado con información completa
     """
-    pass
+    irv_raw: Optional[float] = None  # IRV crudo
+    total_recalls: int = 0  # Total de recalls del vehículo
 
 
 class RecallItem(BaseModel):
@@ -153,6 +155,8 @@ class RecallItem(BaseModel):
     Remedy: Optional[str] = None
     ReportReceivedDate: Optional[str] = None
     Manufacturer: Optional[str] = None
+    severity: Optional[int] = None  # Nivel de severidad
+    severity_score: Optional[float] = None  # Score numérico para cálculos IRV
 
 
 class VehicleRecallsResponse(BaseModel):
