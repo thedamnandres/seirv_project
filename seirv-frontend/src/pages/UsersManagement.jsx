@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { userService } from '../services/api';
 import Loading from '../components/Loading';
+import Modal from '../components/Modal';
 import './UsersManagement.scss';
 
 export default function UsersManagement() {
@@ -194,70 +195,63 @@ export default function UsersManagement() {
 
       {/* Modal de edición */}
       {showEditModal && editingUser && (
-        <div className="users-modal-overlay">
-          <div className="users-modal">
-            <h2>Editar Usuario</h2>
-            
-            <div className="form-group">
-              <label>
-                Nombre Completo
-              </label>
+        <Modal onClose={() => { setShowEditModal(false); setEditingUser(null); }}>
+          <h2>Editar Usuario</h2>
+
+          <div className="form-group">
+            <label>Nombre Completo</label>
+            <input
+              type="text"
+              value={editingUser.full_name}
+              onChange={(e) => setEditingUser({ ...editingUser, full_name: e.target.value })}
+              className="modal-input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              value={editingUser.email}
+              onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+              className="modal-input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Rol</label>
+            <select
+              value={editingUser.role}
+              onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+              className="modal-input"
+            >
+              <option value="user">Usuario</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="checkbox-label">
               <input
-                type="text"
-                value={editingUser.full_name}
-                onChange={(e) => setEditingUser({ ...editingUser, full_name: e.target.value })}
-                className="modal-input"
+                type="checkbox"
+                checked={editingUser.is_active}
+                onChange={(e) => setEditingUser({ ...editingUser, is_active: e.target.checked })}
               />
-            </div>
+              <span className="checkbox-text">Usuario activo</span>
+            </label>
+          </div>
 
-            <div className="form-group">
-              <label>
-                Email
-              </label>
-              <input
-                type="email"
-                value={editingUser.email}
-                onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                className="modal-input"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>
-                Rol
-              </label>
-              <select
-                value={editingUser.role}
-                onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                className="modal-input"
-              >
-                <option value="user">Usuario</option>
-                <option value="admin">Administrador</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={editingUser.is_active}
-                  onChange={(e) => setEditingUser({ ...editingUser, is_active: e.target.checked })}
-                />
-                <span className="checkbox-text">Usuario activo</span>
-              </label>
-            </div>
-
-            <div className="modal-actions">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingUser(null);
-                }}
-                className="btn btn-secondary"
-              >
-                Cancelar
-              </button>
+          <div className="modal-actions">
+            <button
+              type="button"
+              onClick={() => {
+                setShowEditModal(false);
+                setEditingUser(null);
+              }}
+              className="btn btn-secondary"
+            >
+              Cancelar
+            </button>
               <button
                 type="button"
                 onClick={handleSave}
@@ -266,9 +260,8 @@ export default function UsersManagement() {
               >
                 {saving ? 'Guardando...' : 'Guardar'}
               </button>
-            </div>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );
