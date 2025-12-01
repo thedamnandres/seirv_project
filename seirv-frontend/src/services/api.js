@@ -89,3 +89,38 @@ export const userService = {
     await apiClient.delete(`/users/admin/${id}`);
   },
 };
+
+// ======================= ADMIN RECALLS =======================
+// OJO: revisa en Swagger cómo se llaman exactamente estos query params.
+// Si en tu Swagger dice `page_size`/`page`, deja estos nombres.
+// Si dice `limit`/`offset` o algo distinto, cambia aquí los nombres.
+export const adminRecallsService = {
+  async list({ page = 1, page_size = 20, search, severity } = {}) {
+    const res = await apiClient.get('/vehicles/admin/recalls', {
+      params: {
+        page,
+        page_size,
+        // Solo mandamos si tienen valor para evitar 422 de tipo
+        ...(search ? { search } : {}),
+        ...(severity ? { severity } : {}),
+      },
+    });
+    return res.data;
+  },
+
+  async getById(recallId) {
+    const res = await apiClient.get(`/vehicles/admin/recalls/${recallId}`);
+    return res.data;
+  },
+
+  async updateSeverity(recallId, payload, recalculateIrv = true) {
+    const res = await apiClient.put(
+      `/vehicles/admin/recalls/${recallId}/severity`,
+      payload,
+      {
+        params: { recalculate_irv: recalculateIrv },
+      }
+    );
+    return res.data;
+  },
+};

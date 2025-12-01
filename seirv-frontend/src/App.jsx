@@ -16,6 +16,8 @@ const VehicleForm = lazy(() => import('./pages/VehicleForm'));
 const VehicleDetail = lazy(() => import('./pages/VehicleDetail'));   // <-- NUEVO
 const Recalls = lazy(() => import('./pages/Recalls'));
 const UsersManagement = lazy(() => import('./pages/UsersManagement'));
+const AdminRecalls = lazy(() => import('./pages/AdminRecalls'));
+
 
 function AppContent() {
   const location = useLocation();
@@ -89,6 +91,15 @@ function AppContent() {
               </AdminRoute>
             }
           />
+           <Route
+            path="/admin/recalls"
+            element={
+              <AdminRoute>
+                <AdminRecalls />
+              </AdminRoute>
+            }
+          />
+
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/login" />} />
