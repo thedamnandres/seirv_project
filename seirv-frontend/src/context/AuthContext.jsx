@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { normalizeRole } from '../utils/user';
 
 const AuthContext = createContext(null);
 
@@ -21,13 +22,7 @@ function loadUserFromStorage() {
   try {
     const user = JSON.parse(stored);
     // Normalizar el rol si viene del localStorage
-    if (user && user.role) {
-      let roleValue = user.role;
-      if (typeof roleValue === 'object' && roleValue !== null && 'value' in roleValue) {
-        roleValue = roleValue.value;
-      }
-      user.role = String(roleValue).toLowerCase().trim();
-    }
+    if (user) user.role = normalizeRole(user.role);
     return user;
   } catch {
     return null;
@@ -63,20 +58,8 @@ export const AuthProvider = ({ children }) => {
         if (res.ok) {
           const data = await res.json();
           
-          // Normalizar el rol a string si viene como enum
-          if (data.role) {
-            let roleValue = data.role;
-            
-            // Si es un objeto, intentar obtener el value
-            if (typeof roleValue === 'object' && roleValue !== null) {
-              if ('value' in roleValue) {
-                roleValue = roleValue.value;
-              }
-            }
-            
-            // Convertir a string y normalizar
-            data.role = String(roleValue).toLowerCase().trim();
-          }
+          // Normalizar el rol usando la utilidad
+          data.role = normalizeRole(data.role);
           
           setUser(data);
           localStorage.setItem('user', JSON.stringify(data));
@@ -124,27 +107,11 @@ const login = async ({ username, password }) => {
   const token = data.access_token;
   let userData = data.user;
 
-  // Normalizar el rol a string si viene como enum
-  if (userData && userData.role) {
-    let roleValue = userData.role;
-    
-    // Si es un objeto, intentar obtener el value
-    if (typeof roleValue === 'object' && roleValue !== null) {
-      if ('value' in roleValue) {
-        roleValue = roleValue.value;
-      }
-    }
-    
-    // Convertir a string y normalizar
-    userData.role = String(roleValue).toLowerCase().trim();
-  }
+  // Normalizar el rol usando la utilidad
+  if (userData) userData.role = normalizeRole(userData.role);
 
-  if (token) {
-    localStorage.setItem('access_token', token);
-  }
-  if (userData) {
-    localStorage.setItem('user', JSON.stringify(userData));
-  }
+  // Guardar token y usuario usando helper
+  saveAuthData(token, userData);
 
   setUser(userData);
 };
@@ -198,10 +165,12 @@ const register = async ({ full_name, username, email, password }) => {
         },
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data);
-        localStorage.setItem('user', JSON.stringify(data));
+        if (res.ok) {
+          const data = await res.json();
+          // normalizar rol
+          data.role = normalizeRole(data.role);
+          setUser(data);
+          localStorage.setItem('user', JSON.stringify(data));
       } else {
         clearAuthData();
         setUser(null);
@@ -211,12 +180,20 @@ const register = async ({ full_name, username, email, password }) => {
     }
   };
 
+  const updateUser = (userData) => {
+    // Normalizar el rol
+    if (userData) userData.role = normalizeRole(userData.role);
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
     refreshUser,
+    updateUser,
     isAuthenticated: !!user,
     loading,
   };

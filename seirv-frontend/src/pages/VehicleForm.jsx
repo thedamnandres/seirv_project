@@ -242,8 +242,9 @@ useEffect(() => {
           {/* Categoría de riesgo */}
           <section className="form-section">
             <div className="form-group">
-              <label>Categoría de Riesgo *</label>
+              <label htmlFor="category_id_select">Categoría del Vehículo *</label>
               <select
+                id="category_id_select"
                 name="category_id"
                 value={formData.category_id}
                 onChange={handleChange}

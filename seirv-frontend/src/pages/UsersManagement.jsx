@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { userService } from '../services/api';
+import Loading from '../components/Loading';
+import Modal from '../components/Modal';
+import './UsersManagement.scss';
 
 export default function UsersManagement() {
   const [users, setUsers] = useState([]);
@@ -100,13 +103,7 @@ export default function UsersManagement() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner" />
-      </div>
-    );
-  }
+  if (loading) return <Loading />;
 
   return (
     <div className="vehicles-page">
@@ -115,12 +112,12 @@ export default function UsersManagement() {
       </div>
 
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
+        <div className="alert alert-error custom-alert">
           {error}
         </div>
       )}
       {success && (
-        <div className="alert alert-success" style={{ marginBottom: '1rem', backgroundColor: '#d1fae5', color: '#065f46', border: '1px solid #10b981' }}>
+        <div className="alert alert-success custom-alert alert-success-custom">
           {success}
         </div>
       )}
@@ -131,41 +128,41 @@ export default function UsersManagement() {
           <h3>No hay usuarios registrados</h3>
         </div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 10px 25px rgba(15, 23, 42, 0.08)' }}>
+        <div className="users-table-wrapper">
+          <table className="users-table">
             <thead>
-              <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
-                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Usuario</th>
-                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Email</th>
-                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Rol</th>
-                <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Estado</th>
-                <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Vehículos</th>
-                <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Acciones</th>
+              <tr>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th className="center">Estado</th>
+                <th className="center">Vehículos</th>
+                <th className="center">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <td style={{ padding: '1rem' }}>
-                    <div style={{ fontWeight: 600, color: '#111827' }}>{user.full_name}</div>
-                    <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>@{user.username}</div>
+                <tr key={user.id}>
+                  <td>
+                    <div className="user-name">{user.full_name}</div>
+                    <div className="user-sub">@{user.username}</div>
                   </td>
-                  <td style={{ padding: '1rem', color: '#374151' }}>{user.email}</td>
-                  <td style={{ padding: '1rem' }}>
+                  <td className="user-email">{user.email}</td>
+                  <td>
                     <span className={`badge ${user.role === 'admin' ? 'badge-medio' : 'badge-bajo'}`}>
                       {user.role === 'admin' ? '👑 Admin' : '👤 Usuario'}
                     </span>
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'center' }}>
+                  <td className="center">
                     <span className={`badge ${user.is_active ? 'badge-bajo' : 'badge-alto'}`}>
                       {user.is_active ? '✓ Activo' : '✗ Inactivo'}
                     </span>
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'center', color: '#374151', fontWeight: 600 }}>
+                  <td className="center user-vehicles">
                     {user.total_vehicles || 0}
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                  <td className="center">
+                    <div className="actions-container">
                       <button
                         type="button"
                         onClick={() => handleEdit(user)}
@@ -198,107 +195,63 @@ export default function UsersManagement() {
 
       {/* Modal de edición */}
       {showEditModal && editingUser && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: '#fff',
-            borderRadius: '16px',
-            padding: '2rem',
-            maxWidth: '500px',
-            width: '90%',
-            maxHeight: '90vh',
-            overflow: 'auto'
-          }}>
-            <h2 style={{ marginTop: 0, marginBottom: '1.5rem' }}>Editar Usuario</h2>
-            
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#4b5563' }}>
-                Nombre Completo
-              </label>
+        <Modal onClose={() => { setShowEditModal(false); setEditingUser(null); }}>
+          <h2>Editar Usuario</h2>
+
+          <div className="form-group">
+            <label>Nombre Completo</label>
+            <input
+              type="text"
+              value={editingUser.full_name}
+              onChange={(e) => setEditingUser({ ...editingUser, full_name: e.target.value })}
+              className="modal-input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              value={editingUser.email}
+              onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+              className="modal-input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Rol</label>
+            <select
+              value={editingUser.role}
+              onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+              className="modal-input"
+            >
+              <option value="user">Usuario</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="checkbox-label">
               <input
-                type="text"
-                value={editingUser.full_name}
-                onChange={(e) => setEditingUser({ ...editingUser, full_name: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.6rem 0.8rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '10px',
-                  fontSize: '0.95rem'
-                }}
+                type="checkbox"
+                checked={editingUser.is_active}
+                onChange={(e) => setEditingUser({ ...editingUser, is_active: e.target.checked })}
               />
-            </div>
+              <span className="checkbox-text">Usuario activo</span>
+            </label>
+          </div>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#4b5563' }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={editingUser.email}
-                onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.6rem 0.8rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '10px',
-                  fontSize: '0.95rem'
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#4b5563' }}>
-                Rol
-              </label>
-              <select
-                value={editingUser.role}
-                onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.6rem 0.8rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '10px',
-                  fontSize: '0.95rem'
-                }}
-              >
-                <option value="user">Usuario</option>
-                <option value="admin">Administrador</option>
-              </select>
-            </div>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={editingUser.is_active}
-                  onChange={(e) => setEditingUser({ ...editingUser, is_active: e.target.checked })}
-                />
-                <span style={{ fontWeight: 600, color: '#4b5563' }}>Usuario activo</span>
-              </label>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingUser(null);
-                }}
-                className="btn btn-secondary"
-              >
-                Cancelar
-              </button>
+          <div className="modal-actions">
+            <button
+              type="button"
+              onClick={() => {
+                setShowEditModal(false);
+                setEditingUser(null);
+              }}
+              className="btn btn-secondary"
+            >
+              Cancelar
+            </button>
               <button
                 type="button"
                 onClick={handleSave}
@@ -307,9 +260,8 @@ export default function UsersManagement() {
               >
                 {saving ? 'Guardando...' : 'Guardar'}
               </button>
-            </div>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

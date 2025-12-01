@@ -1,0 +1,388 @@
+.admin-recalls-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  .admin-recalls-header {
+    margin-bottom: 1.5rem;
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: #6c757d;
+    }
+  }
+
+  .admin-recalls-search-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .admin-recalls-search-form {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-end;
+
+    .field-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      label {
+        font-weight: 600;
+      }
+
+      .field-hint {
+        margin-left: 0.25rem;
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 400;
+      }
+
+      input {
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+      }
+    }
+  }
+
+  .alert {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+
+    &.alert-error {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    &.alert-success {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+  }
+
+  .admin-recalls-detail-layout {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+    gap: 1.5rem;
+
+    @media (max-width: 992px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .admin-recall-card,
+  .admin-recall-form-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .admin-recall-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    h2 {
+      font-size: 1.4rem;
+      margin: 0;
+    }
+  }
+
+  .admin-recall-meta {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+
+    p {
+      margin: 0.15rem 0;
+    }
+  }
+
+  .admin-recall-block {
+    margin-top: 0.75rem;
+
+    &.consequence {
+      background: #fff3cd;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+
+    &.remedy {
+      background: #d1ecf1;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+
+    h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #495057;
+    }
+  }
+
+  .admin-recall-form-card {
+    .admin-recall-form-hint {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-bottom: 1rem;
+    }
+
+    .admin-recall-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        label {
+          font-weight: 600;
+        }
+
+        .field-hint {
+          margin-left: 0.25rem;
+          font-size: 0.8rem;
+          color: #6c757d;
+          font-weight: 400;
+        }
+
+        select,
+        input,
+        textarea {
+          border-radius: 8px;
+          border: 1px solid #dee2e6;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
+/* Estilos para AdminRecallDetail */
+.page.admin-recall-detail {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 1rem;
+
+    h1 {
+      font-size: 1.75rem;
+      margin: 0;
+    }
+
+    .page-subtitle {
+      color: #6c757d;
+      font-size: 0.9rem;
+      margin: 0.25rem 0 0 0;
+    }
+
+    .page-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+  }
+
+  .admin-recall-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem;
+
+    @media (max-width: 992px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+
+    h2 {
+      font-size: 1.4rem;
+      margin: 0 0 1rem 0;
+    }
+  }
+
+  .meta-card {
+    .meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #f3f4f6;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      dt {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+
+      dd {
+        margin: 0;
+        font-weight: 500;
+        color: #111827;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .detail-card {
+    .detail-block {
+      margin-bottom: 1.5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      h3 {
+        font-size: 1rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: #495057;
+      }
+
+      &.warning-block {
+        background: #fff3cd;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 4px solid #ffc107;
+      }
+
+      &.info-block {
+        background: #d1ecf1;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 4px solid #17a2b8;
+      }
+
+      &.notes-block {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 4px solid #6c757d;
+      }
+    }
+  }
+
+  .edit-severity-card {
+    .admin-recall-form-hint {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-bottom: 1rem;
+    }
+
+    .admin-recall-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        label {
+          font-weight: 600;
+        }
+
+        .field-hint {
+          margin-left: 0.25rem;
+          font-size: 0.8rem;
+          color: #6c757d;
+          font-weight: 400;
+        }
+
+        select,
+        textarea {
+          border-radius: 8px;
+          border: 1px solid #dee2e6;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.9rem;
+          font-family: inherit;
+        }
+
+        textarea {
+          resize: vertical;
+          min-height: 80px;
+        }
+      }
+
+      button[type="submit"] {
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+
+/* Reutiliza estos si ya los tienes en Recalls.scss */
+.severity-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.severity-high {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.severity-medium {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.severity-low {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.severity-none {
+  background-color: #6c757d;
+  color: #fff;
+}
