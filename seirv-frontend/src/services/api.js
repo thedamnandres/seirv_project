@@ -3,6 +3,8 @@ import axios from 'axios';
 
 // Usar variable de entorno o default a localhost para desarrollo
 // Remover barra final si existe para evitar dobles barras en las URLs
+
+
 const getApiBaseUrl = () => {
   const url = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
   return url.endsWith('/') ? url.slice(0, -1) : url;
@@ -69,6 +71,8 @@ export const vehicleService = {
     const res = await apiClient.get(`/vehicles/admin/recalls/${recallId}`);
     return res.data;
   },
+
+  
 };
 
 // ======================= USERS =======================

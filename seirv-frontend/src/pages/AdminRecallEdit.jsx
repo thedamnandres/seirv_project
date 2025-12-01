@@ -1,29 +1,34 @@
+// src/pages/AdminRecallEdit.jsx
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { vehicleService } from '../services/api';
-import Loading from '../components/Loading';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { adminRecallsService } from '../services/api';
+import './AdminRecalls.scss';
 
-const getSeverityLabel = (severity) => {
-  if (severity === 3) return 'Severidad Alta';
-  if (severity === 2) return 'Severidad Media';
-  if (severity === 1) return 'Severidad Baja';
-  return 'Sin severidad';
-};
+function getSeverityLabel(severity) {
+  const n = Number(severity);
+  if (n === 3) return 'Severidad Alta';
+  if (n === 2) return 'Severidad Media';
+  if (n === 1) return 'Severidad Baja';
+  return 'Sin severidad asignada';
+}
 
-const getSeverityClass = (severity) => {
-  if (severity === 3) return 'severity-high';
-  if (severity === 2) return 'severity-medium';
-  if (severity === 1) return 'severity-low';
+function getSeverityClass(severity) {
+  const n = Number(severity);
+  if (n === 3) return 'severity-high';
+  if (n === 2) return 'severity-medium';
+  if (n === 1) return 'severity-low';
   return 'severity-none';
-};
+}
 
 export default function AdminRecallEdit() {
-  const { id } = useParams(); // recall_id
+  // Aceptar tanto :id como :recallId en la ruta
+  const params = useParams();
+  const recallIdParam = params.recallId ?? params.id;
+
   const navigate = useNavigate();
 
   const [recall, setRecall] = useState(null);
-
-  const [severity, setSeverity] = useState(2);
+  const [severity, setSeverity] = useState('');
   const [severityScore, setSeverityScore] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -32,27 +37,37 @@ export default function AdminRecallEdit() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // 1) Cargar datos del recall
+  // Cargar datos del recall
   useEffect(() => {
+    const idNumber = Number(recallIdParam);
+    if (!recallIdParam || Number.isNaN(idNumber) || idNumber <= 0) {
+      setError('ID de recall inválido.');
+      setLoading(false);
+      return;
+    }
+
     const load = async () => {
       setLoading(true);
       setError('');
       try {
-        const data = await vehicleService.getAdminRecallById(id);
+        const data = await adminRecallsService.getById(idNumber);
         setRecall(data);
-        // Inicializar formulario
-        setSeverity(data.severity ?? 2);
+        setSeverity(data.severity ?? '');
         setSeverityScore(
-          data.severity_score !== null && data.severity_score !== undefined
+          typeof data.severity_score === 'number'
             ? String(data.severity_score)
             : ''
         );
-        setNotes(data.notes || '');
+        setNotes(data.notes ?? '');
       } catch (err) {
         console.error(err);
-        setError(
+        const detail =
           err.response?.data?.detail ||
-            'No se pudo cargar el recall para edición.'
+          'No se pudo cargar la información del recall.';
+        setError(
+          Array.isArray(detail)
+            ? detail.map((d) => d.msg || d).join(' | ')
+            : String(detail)
         );
       } finally {
         setLoading(false);
@@ -60,237 +75,229 @@ export default function AdminRecallEdit() {
     };
 
     load();
-  }, [id]);
+  }, [recallIdParam]);
 
-  const handleSubmit = async (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSaving(true);
+    if (!recall) return;
+
     setError('');
     setSuccess('');
+    setSaving(true);
 
     try {
       const payload = {
         severity: Number(severity),
       };
 
-      if (severityScore !== '') {
+      if (severityScore) {
         payload.severity_score = Number(severityScore);
       }
       if (notes.trim()) {
         payload.notes = notes.trim();
       }
 
-      const updated = await vehicleService.updateRecallSeverity(
-        id,
+      const updated = await adminRecallsService.updateSeverity(
+        recall.id,
         payload,
-        true // recalcular IRV
+        true // recalculate_irv
       );
 
       setRecall(updated);
       setSuccess('Severidad actualizada correctamente y IRV recalculado.');
     } catch (err) {
       console.error(err);
+      const detail =
+        err.response?.data?.detail || 'Ocurrió un error al actualizar la severidad.';
       setError(
-        err.response?.data?.detail ||
-          'Ocurrió un error al actualizar la severidad.'
+        Array.isArray(detail)
+          ? detail.map((d) => d.msg || d).join(' | ')
+          : String(detail)
       );
     } finally {
       setSaving(false);
     }
   };
 
-  const handleBack = () => {
-    // vuelve al detalle, si quieres puedes cambiar a /admin/recalls
-    navigate(-1);
-  };
-
-  if (loading) return <Loading />;
-
-  if (error && !recall) {
+  if (loading) {
     return (
-      <div className="page admin-recall-edit">
-        <div className="page-header">
-          <button
-            type="button"
-            className="btn btn-outline btn-sm"
-            onClick={handleBack}
-          >
-            ← Volver
-          </button>
-          <h1>Editar severidad de Recall</h1>
-        </div>
-        <div className="alert alert-error">{error}</div>
+      <div className="admin-recalls-page">
+        <p>Cargando recall…</p>
       </div>
     );
   }
 
-  const severityNumber = Number(severity);
-  const previewLabel = getSeverityLabel(severityNumber);
-  const previewClass = getSeverityClass(severityNumber);
+  if (error && !recall) {
+    return (
+      <div className="admin-recalls-page">
+        <div className="alert alert-error">{error}</div>
+        <Link to="/admin/recalls" className="btn btn-outline">
+          Volver al panel de recalls
+        </Link>
+      </div>
+    );
+  }
+
+  if (!recall) {
+    return null;
+  }
 
   return (
-    <div className="page admin-recall-edit">
-      <div className="page-header">
-        <button
-          type="button"
-          className="btn btn-outline btn-sm"
-          onClick={handleBack}
-        >
-          ← Volver
-        </button>
+    <div className="admin-recalls-page">
+      <header className="admin-recalls-header">
+        <h1>Actualizar severidad</h1>
+        <p>
+          Ajusta el nivel de severidad de este recall. Al guardar, se recalculará
+          el IRV del vehículo asociado.
+        </p>
+      </header>
 
-        <div>
-          <h1>Editar severidad de Recall</h1>
-          {recall && (
-            <p className="page-subtitle">
-              {recall.nhtsa_campaign_number || `Recall #${recall.id}`} ·
-              Vehículo #{recall.vehicle_id}
+      <div className="admin-recalls-top-actions">
+        <Link to="/admin/recalls" className="btn btn-outline btn-sm">
+          ← Volver al panel
+        </Link>
+        <span className="recall-id-pill">Recall ID: {recall.id}</span>
+      </div>
+
+      {error && <div className="alert alert-error">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
+
+      <section className="admin-recalls-detail-layout">
+        {/* Columna izquierda: resumen */}
+        <div className="admin-recall-card">
+          <div className="admin-recall-card-header">
+            <h2>{recall.nhtsa_campaign_number || `Recall #${recall.id}`}</h2>
+            <span className={`severity-badge ${getSeverityClass(recall.severity)}`}>
+              {getSeverityLabel(recall.severity)}
+            </span>
+          </div>
+
+          <div className="admin-recall-meta">
+            <p>
+              <strong>Vehículo ID:</strong> {recall.vehicle_id}
             </p>
+            {recall.component && (
+              <p>
+                <strong>Componente:</strong> {recall.component}
+              </p>
+            )}
+            {recall.manufacturer && (
+              <p>
+                <strong>Fabricante:</strong> {recall.manufacturer}
+              </p>
+            )}
+            {typeof recall.severity_score === 'number' && (
+              <p>
+                <strong>Score actual:</strong> {recall.severity_score.toFixed(1)}
+              </p>
+            )}
+          </div>
+
+          {recall.summary && (
+            <div className="admin-recall-block">
+              <h3>Problema</h3>
+              <p>{recall.summary}</p>
+            </div>
+          )}
+
+          {recall.consequence && (
+            <div className="admin-recall-block consequence">
+              <h3>Consecuencia</h3>
+              <p>{recall.consequence}</p>
+            </div>
+          )}
+
+          {recall.remedy && (
+            <div className="admin-recall-block remedy">
+              <h3>Solución</h3>
+              <p>{recall.remedy}</p>
+            </div>
           )}
         </div>
 
-        <div className="page-actions">
-          <span className={`severity-badge ${previewClass}`}>
-            {previewLabel}
-          </span>
-        </div>
-      </div>
+        {/* Columna derecha: formulario */}
+        <div className="admin-recall-form-card">
+          <h2>Editar severidad</h2>
+          <p className="admin-recall-form-hint">
+            Selecciona el nivel 1–3 y opcionalmente ajusta el score (1.0–5.0) y
+            las notas internas. El IRV se recalculará automáticamente.
+          </p>
 
-      <div className="admin-recall-layout">
-        {/* Panel info (izquierda) */}
-        {recall && (
-          <section className="card meta-card">
-            <h2>Información actual</h2>
-            <dl className="meta-list">
-              <div className="meta-row">
-                <dt>Campaña NHTSA</dt>
-                <dd>{recall.nhtsa_campaign_number || 'N/A'}</dd>
-              </div>
-              <div className="meta-row">
-                <dt>Componente</dt>
-                <dd>{recall.component || 'N/A'}</dd>
-              </div>
-              <div className="meta-row">
-                <dt>Fabricante</dt>
-                <dd>{recall.manufacturer || 'N/A'}</dd>
-              </div>
-              <div className="meta-row">
-                <dt>Severidad actual</dt>
-                <dd>
-                  <span className={`severity-badge ${getSeverityClass(recall.severity)}`}>
-                    {getSeverityLabel(recall.severity)}
-                  </span>
-                </dd>
-              </div>
-              <div className="meta-row">
-                <dt>Score actual</dt>
-                <dd>{recall.severity_score ?? 'N/A'}</dd>
-              </div>
-            </dl>
-          </section>
-        )}
-
-        {/* Panel formulario (derecha) */}
-        <section className="card form-card">
-          <h2>Actualizar severidad</h2>
-
-          {error && <div className="alert alert-error">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
-
-          <form onSubmit={handleSubmit} className="form-vertical">
-            {/* Severidad */}
-            <div className="form-group">
+          <form onSubmit={handleSave} className="admin-recall-form">
+            <div className="field-group">
               <label>Severidad (1–3)</label>
-              <div className="severity-options">
-                <label className="severity-option">
+              <div className="severity-radio-group">
+                <label className="severity-radio severity-low">
                   <input
                     type="radio"
                     name="severity"
                     value="1"
-                    checked={severityNumber === 1}
+                    checked={severity === '1' || severity === 1}
                     onChange={(e) => setSeverity(e.target.value)}
                   />
-                  <span className="badge severity-low">Baja (1)</span>
+                  <span>Baja (1)</span>
                 </label>
-
-                <label className="severity-option">
+                <label className="severity-radio severity-medium">
                   <input
                     type="radio"
                     name="severity"
                     value="2"
-                    checked={severityNumber === 2}
+                    checked={severity === '2' || severity === 2}
                     onChange={(e) => setSeverity(e.target.value)}
                   />
-                  <span className="badge severity-medium">Media (2)</span>
+                  <span>Media (2)</span>
                 </label>
-
-                <label className="severity-option">
+                <label className="severity-radio severity-high">
                   <input
                     type="radio"
                     name="severity"
                     value="3"
-                    checked={severityNumber === 3}
+                    checked={severity === '3' || severity === 3}
                     onChange={(e) => setSeverity(e.target.value)}
                   />
-                  <span className="badge severity-high">Alta (3)</span>
+                  <span>Alta (3)</span>
                 </label>
               </div>
             </div>
 
-            {/* Score opcional */}
-            <div className="form-group">
-              <label htmlFor="severityScore">
-                Score (1.0 – 5.0, opcional)
+            <div className="field-group">
+              <label htmlFor="severity-score">
+                Score (1.0–5.0, opcional)
               </label>
               <input
-                id="severityScore"
+                id="severity-score"
                 type="number"
+                step="0.1"
                 min="1"
                 max="5"
-                step="0.1"
                 value={severityScore}
                 onChange={(e) => setSeverityScore(e.target.value)}
-                className="form-control"
-                placeholder="Ej: 3.5"
+                placeholder="Ej: 3.6"
               />
-              <small className="form-text">
-                Déjalo vacío si no quieres modificar el score.
-              </small>
+              <small>Déjalo vacío si no quieres modificar el score.</small>
             </div>
 
-            {/* Notas opcionales */}
-            <div className="form-group">
+            <div className="field-group">
               <label htmlFor="notes">Notas internas (opcional)</label>
               <textarea
                 id="notes"
                 rows={4}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="form-control"
-                placeholder="Ej: 'Corregido manualmente: recall crítico de frenos'"
+                placeholder="Ej: Corregido manualmente: recall crítico de frenos…"
               />
             </div>
 
-            <div className="form-actions">
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={handleBack}
-                disabled={saving}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={saving}
-              >
-                {saving ? 'Guardando...' : 'Guardar cambios'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={saving || !severity}
+            >
+              {saving ? 'Guardando…' : 'Guardar cambios'}
+            </button>
           </form>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
