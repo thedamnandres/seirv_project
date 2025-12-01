@@ -22,10 +22,11 @@ class Vehicle(Base):
     license_plate = Column(String(8), nullable=False, index=True)  
     mileage = Column(Integer, nullable=False)
     
-    # IRV (futuro)
-    irv_value = Column(Float, default=0.0)
-    irv_level = Column(String(20), default="N/A")
-    last_irv_calculation = Column(DateTime(timezone=True))
+    # IRV 
+    irv_value = Column(Float, default=0.0)  # IRV normalizado
+    irv_raw = Column(Float, default=0.0)  # IRV crudo (para referencia y análisis)
+    irv_level = Column(String(20), default="N/A")  # Nivel: Sin Recalls, Bajo, Medio, Alto
+    last_irv_calculation = Column(DateTime(timezone=True))  # Ultimo cálculo
     
     # Metadatos
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -40,6 +41,8 @@ class Vehicle(Base):
     
     user = relationship("User", back_populates="vehicles")
     category = relationship("Category", back_populates="vehicles")  # ← NUEVO
+    recalls = relationship("Recall", back_populates="vehicle", cascade="all, delete-orphan")
+    irv_history = relationship("IRVHistory", back_populates="vehicle", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Vehicle(id={self.id}, {self.year} {self.make} {self.model})>"
