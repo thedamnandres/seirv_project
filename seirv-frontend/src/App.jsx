@@ -17,6 +17,7 @@ const VehicleDetail = lazy(() => import('./pages/VehicleDetail'));   // <-- NUEV
 const Recalls = lazy(() => import('./pages/Recalls'));
 const UsersManagement = lazy(() => import('./pages/UsersManagement'));
 const AdminRecalls = lazy(() => import('./pages/AdminRecalls'));
+const AdminRecallDetail = lazy(() => import('./pages/AdminRecallDetail'));
 
 
 function AppContent() {
@@ -100,6 +101,14 @@ function AppContent() {
             }
           />
 
+          <Route
+            path="/admin/recalls/:id"
+            element={
+              <AdminRoute>
+                <AdminRecallDetail />
+              </AdminRoute>
+            }
+          />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/login" />} />

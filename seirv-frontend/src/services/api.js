@@ -64,6 +64,11 @@ export const vehicleService = {
     );
     return res.data;
   },
+
+    async getAdminRecallById(recallId) {
+    const res = await apiClient.get(`/vehicles/admin/recalls/${recallId}`);
+    return res.data;
+  },
 };
 
 // ======================= USERS =======================
