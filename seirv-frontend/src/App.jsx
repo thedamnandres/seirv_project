@@ -18,7 +18,7 @@ const Recalls = lazy(() => import('./pages/Recalls'));
 const UsersManagement = lazy(() => import('./pages/UsersManagement'));
 const AdminRecalls = lazy(() => import('./pages/AdminRecalls'));
 const AdminRecallDetail = lazy(() => import('./pages/AdminRecallDetail'));
-
+const AdminRecallEdit = lazy(() => import('./pages/AdminRecallEdit'));
 
 function AppContent() {
   const location = useLocation();
@@ -97,6 +97,26 @@ function AppContent() {
             element={
               <AdminRoute>
                 <AdminRecalls />
+              </AdminRoute>
+            }
+          />
+
+            {/* Detalle de recall */}
+          <Route
+            path="/admin/recalls/:id"
+            element={
+              <AdminRoute>
+                <AdminRecallDetail />
+              </AdminRoute>
+            }
+          />
+
+          {/* Editar severidad */}
+          <Route
+            path="/admin/recalls/:id/edit"
+            element={
+              <AdminRoute>
+                <AdminRecallEdit />
               </AdminRoute>
             }
           />

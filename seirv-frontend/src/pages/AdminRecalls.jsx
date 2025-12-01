@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { adminRecallsService } from '../services/api';
 import './AdminRecalls.scss';
+import { useNavigate } from 'react-router-dom';
 
 function getSeverityLabel(severity) {
   const n = Number(severity);
@@ -20,6 +21,8 @@ function getSeverityClass(severity) {
 }
 
 export default function AdminRecalls() {
+  const navigate = useNavigate();
+
   const [searchId, setSearchId] = useState('');
   const [recall, setRecall] = useState(null);
 
@@ -52,7 +55,9 @@ export default function AdminRecalls() {
       // precargar formulario con valores actuales
       setSeverity(data.severity ?? '');
       setSeverityScore(
-        typeof data.severity_score === 'number' ? String(data.severity_score) : ''
+        typeof data.severity_score === 'number'
+          ? String(data.severity_score)
+          : ''
       );
       setNotes(data.notes ?? '');
     } catch (err) {
@@ -171,7 +176,11 @@ export default function AdminRecalls() {
           <div className="admin-recall-card">
             <div className="admin-recall-card-header">
               <h2>{recall.nhtsa_campaign_number || `Recall #${recall.id}`}</h2>
-              <span className={`severity-badge ${getSeverityClass(recall.severity)}`}>
+              <span
+                className={`severity-badge ${getSeverityClass(
+                  recall.severity
+                )}`}
+              >
                 {getSeverityLabel(recall.severity)}
               </span>
             </div>
@@ -192,7 +201,8 @@ export default function AdminRecalls() {
               )}
               {typeof recall.severity_score === 'number' && (
                 <p>
-                  <strong>Score actual:</strong> {recall.severity_score.toFixed(1)}
+                  <strong>Score actual:</strong>{' '}
+                  {recall.severity_score.toFixed(1)}
                 </p>
               )}
               {recall.report_received_date && (
@@ -227,13 +237,26 @@ export default function AdminRecalls() {
 
           {/* Columna: formulario de severidad */}
           <div className="admin-recall-form-card">
-            <h2>Editar severidad</h2>
+            <div className="admin-recall-form-header">
+              <h2>Editar severidad</h2>
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                onClick={() => navigate(`/admin/recalls/${recall.id}/edit`)}
+              >
+                Abrir página de edición
+              </button>
+            </div>
+
             <p className="admin-recall-form-hint">
               Ajusta el nivel de severidad (1 = Bajo, 2 = Medio, 3 = Alto). Al
               guardar, se recalculará el IRV del vehículo.
             </p>
 
-            <form onSubmit={handleUpdateSeverity} className="admin-recall-form">
+            <form
+              onSubmit={handleUpdateSeverity}
+              className="admin-recall-form"
+            >
               <div className="field-group">
                 <label htmlFor="severity">Severidad (1, 2 o 3)</label>
                 <select
@@ -269,7 +292,9 @@ export default function AdminRecalls() {
               <div className="field-group">
                 <label htmlFor="notes">
                   Notas internas
-                  <span className="field-hint">Opcional (solo visible para admin)</span>
+                  <span className="field-hint">
+                    Opcional (solo visible para admin)
+                  </span>
                 </label>
                 <textarea
                   id="notes"
