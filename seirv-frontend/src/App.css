@@ -493,6 +493,16 @@ body {
   color: #b91c1c;
 }
 
+.alert-success {
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  border: 1px solid #a7f3d0;
+}
+
 /* grid de vehículos */
 
 .vehicles-grid {
@@ -524,14 +534,7 @@ body {
   }
 }
 
-.vehicle-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 1.2rem 1.4rem;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-  display: flex;
-  flex-direction: column;
-}
+/* Primera definición - será sobrescrita más abajo, pero la mantenemos para compatibilidad */
 
 .vehicle-header {
   display: flex;
@@ -543,6 +546,7 @@ body {
 .vehicle-header h3 {
   margin: 0;
   font-size: 1.05rem;
+  color: #ffffff !important; /* Texto blanco para contraste en fondo oscuro */
 }
 
 .vehicle-year {
@@ -572,7 +576,12 @@ body {
 
 .info-item .value {
   font-weight: 600;
-  color: #111827;
+  color: #111827; /* Para fondos claros */
+}
+
+/* En vehicle-card con fondo oscuro, el value debe ser blanco */
+.vehicle-card .info-item .value {
+  color: #ffffff !important;
 }
 
 .vehicle-actions {
@@ -723,32 +732,70 @@ body {
   margin-bottom: 1.5rem;
 }
 
-.vehicles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
+/* El .vehicles-grid ya está definido arriba con media queries correctas */
 
-/* Card de vehículo */
+/* Card de vehículo - ESTILO PRINCIPAL */
 .vehicle-card {
-  background: #111827;      /* gris oscuro bonitito */
+  background: #111827 !important;      /* gris oscuro bonitito */
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  color: #ffffff !important; /* Texto blanco por defecto en toda la tarjeta */
+}
+
+/* Asegurar que TODOS los elementos de texto dentro de vehicle-card sean visibles */
+.vehicle-card * {
+  color: inherit; /* Hereda el color blanco por defecto */
+}
+
+.vehicle-card .label,
+.vehicle-card span.label {
+  color: #d1d5db !important; /* Gris claro para etiquetas */
+}
+
+.vehicle-card .value,
+.vehicle-card span.value,
+.vehicle-card .info-item .value {
+  color: #ffffff !important; /* Blanco para valores */
+}
+
+.vehicle-card h1,
+.vehicle-card h2,
+.vehicle-card h3,
+.vehicle-card h4,
+.vehicle-card h5,
+.vehicle-card h6 {
+  color: #ffffff !important; /* Blanco para todos los títulos */
+}
+
+.vehicle-card p {
+  color: #d1d5db !important; /* Gris claro para párrafos */
 }
 
 .vehicle-card-header h2 {
   font-size: 1.1rem;
   margin-bottom: 0.25rem;
+  color: #ffffff !important; /* Texto blanco para contraste */
 }
 
 .vehicle-card-header span {
   display: block;
   font-size: 0.9rem;
-  opacity: 0.8;
+  color: #d1d5db !important; /* Gris claro para mejor contraste */
+  opacity: 0.9;
+}
+
+/* Header del vehículo (make, model, year) */
+.vehicle-header h3 {
+  color: #ffffff !important; /* Texto blanco para contraste */
+}
+
+.vehicle-year {
+  background: rgba(59, 130, 246, 0.2) !important; /* Azul más visible */
+  color: #93c5fd !important; /* Azul claro para contraste */
 }
 
 /* Bloque IRV */
@@ -815,6 +862,29 @@ body {
   border: none;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Asegurar que los botones dentro de vehicle-card sean visibles */
+.vehicle-card .btn-outline {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #93c5fd !important;
+  border-color: #3b82f6 !important;
+}
+
+.vehicle-card .btn-outline:hover {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #bfdbfe !important;
+}
+
+.vehicle-card .btn-danger {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+.vehicle-card .btn-danger:hover {
+  background: #b91c1c !important;
+  color: #ffffff !important;
 }
 
 /* FIX para que el número IRV sea visible */
@@ -845,13 +915,27 @@ body {
 
 /* Etiquetas (Placa:, Kilometraje:, Categoría:) */
 .vehicle-info .label {
-  color: #9ca3af; /* gris clarito */
+  color: #d1d5db !important; /* Gris más claro para mejor contraste */
+  font-weight: 500;
 }
 
 /* Valores (GAY-2233, 23.232 km, Deportivo) */
 .vehicle-card .value {
-  color: #f9fafb !important;  /* <-- aquí el fix real */
+  color: #ffffff !important;  /* Blanco para máximo contraste */
   font-weight: 600;
+}
+
+/* Asegurar que todos los textos dentro de vehicle-card sean visibles */
+.vehicle-card .info-item {
+  color: #ffffff;
+}
+
+.vehicle-card .info-item .label {
+  color: #d1d5db !important;
+}
+
+.vehicle-card .info-item .value {
+  color: #ffffff !important;
 }
 
 .vehicle-detail-page {
@@ -870,12 +954,15 @@ body {
 .vehicle-detail-header h1 {
   font-size: 1.6rem;
   margin: 0;
+  color: #111827; /* Negro para contraste en fondo claro */
+  font-weight: 700;
 }
 
 .vehicle-detail-year {
   font-size: 1rem;
   font-weight: 500;
-  opacity: 0.8;
+  color: #6b7280; /* Gris para el año */
+  opacity: 0.9;
 }
 
 .vehicle-detail-layout {
@@ -895,6 +982,20 @@ body {
   min-height: 260px;
 }
 
+/* Asegurar que la tarjeta de detalle también tenga textos visibles */
+.vehicle-detail-card.vehicle-card {
+  background: #111827; /* Mantener fondo oscuro */
+}
+
+.vehicle-detail-card .vehicle-header h3 {
+  color: #ffffff !important;
+}
+
+.vehicle-detail-card .vehicle-year {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #93c5fd !important;
+}
+
 .vehicle-detail-panel {
   background: #111827;
   border-radius: 12px;
@@ -905,6 +1006,22 @@ body {
 .vehicle-detail-panel h2 {
   margin-top: 0;
   margin-bottom: 0.75rem;
+  color: #ffffff !important; /* Texto blanco para contraste */
+  font-weight: 600;
+}
+
+.vehicle-detail-panel p {
+  color: #d1d5db !important; /* Gris claro para contraste */
+  line-height: 1.6;
+}
+
+.vehicle-detail-panel a {
+  color: #93c5fd !important; /* Azul claro para enlaces */
+  text-decoration: underline;
+}
+
+.vehicle-detail-panel a:hover {
+  color: #bfdbfe !important; /* Azul más claro al hover */
 }
 
 .irv-breakdown {

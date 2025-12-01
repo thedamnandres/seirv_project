@@ -62,6 +62,7 @@
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
+      background: #ffffff; /* Fondo blanco para contraste */
 
       &:hover {
         border-color: #007bff;
@@ -79,20 +80,21 @@
         h4 {
           margin: 0 0 0.25rem 0;
           font-size: 1rem;
-          color: #212529;
+          color: #212529; /* Negro para máximo contraste en fondo blanco */
+          font-weight: 600;
         }
 
         .license-plate {
           margin: 0;
           font-size: 0.875rem;
-          color: #6c757d;
+          color: #495057; /* Gris más oscuro para mejor contraste */
           font-weight: 600;
         }
       }
 
       .vehicle-arrow {
         font-size: 1.5rem;
-        color: #6c757d;
+        color: #495057; /* Gris más oscuro para mejor contraste */
       }
     }
   }
@@ -132,8 +134,9 @@
       }
 
       p {
-        color: #6c757d;
+        color: #495057; /* Gris más oscuro para mejor contraste */
         font-size: 1.125rem;
+        font-weight: 500;
       }
 
       button {
@@ -189,7 +192,7 @@
         }
 
         p {
-          color: #6c757d;
+          color: #495057; /* Gris más oscuro para mejor contraste */
         }
       }
 
@@ -210,16 +213,19 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
 
             .recall-number {
               font-weight: 700;
-              color: #007bff;
+              color: #0056b3; /* Azul más oscuro para mejor contraste */
               font-size: 0.875rem;
             }
 
             .recall-date {
               font-size: 0.875rem;
-              color: #6c757d;
+              color: #495057; /* Gris más oscuro para mejor contraste */
+              font-weight: 500;
             }
           }
 
@@ -231,9 +237,13 @@
             font-size: 0.875rem;
 
             strong {
-              color: #212529;
+              color: #212529; /* Negro para máximo contraste */
               margin-right: 0.5rem;
+              font-weight: 600;
             }
+            
+            /* Asegurar que el texto del componente sea visible */
+            color: #212529;
           }
 
           .recall-summary,
@@ -244,13 +254,14 @@
             strong {
               display: block;
               margin-bottom: 0.5rem;
-              color: #212529;
+              color: #212529; /* Negro para máximo contraste */
               font-size: 0.9rem;
+              font-weight: 600;
             }
 
             p {
               margin: 0;
-              color: #6c757d;
+              color: #495057; /* Gris más oscuro para mejor contraste */
               line-height: 1.6;
               font-size: 0.9rem;
             }
@@ -263,7 +274,12 @@
             border-left: 3px solid #f0ad4e;
 
             strong {
-              color: #856404;
+              color: #856404; /* Marrón oscuro para contraste */
+              font-weight: 600;
+            }
+            
+            p {
+              color: #664d03; /* Marrón más oscuro para mejor contraste */
             }
           }
 
@@ -274,8 +290,29 @@
             border-left: 3px solid #17a2b8;
 
             strong {
-              color: #0c5460;
+              color: #0c5460; /* Azul oscuro para contraste */
+              font-weight: 600;
             }
+            
+            p {
+              color: #055160; /* Azul más oscuro para mejor contraste */
+            }
+          }
+
+          .recall-manufacturer {
+            margin-top: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.875rem;
+
+            strong {
+              color: #212529; /* Negro para máximo contraste */
+              font-weight: 600;
+              margin-right: 0.5rem;
+            }
+            
+            color: #495057; /* Gris oscuro para mejor contraste */
           }
         }
       }
@@ -351,7 +388,8 @@
 .severity-score {
   margin-top: 0.25rem;
   font-size: 0.8rem;
-  color: #6c757d;
+  color: #495057; /* Gris más oscuro para mejor contraste */
+  font-weight: 500;
 }
 
 @keyframes spin {
