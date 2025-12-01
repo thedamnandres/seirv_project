@@ -281,6 +281,77 @@
       }
     }
   }
+
+      .recalls-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+
+      h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #212529;
+      }
+    }
+
+    .info-state {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      background-color: #d4edda;
+      color: #155724;
+      margin-bottom: 1rem;
+
+      .info-icon {
+        font-size: 1.25rem;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.9rem;
+      }
+    }
+}
+
+.severity-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Severidad Alta */
+.severity-high {
+  background-color: #dc3545; // rojo
+  color: #fff;
+}
+
+/* Severidad Media */
+.severity-medium {
+  background-color: #ffc107; // amarillo
+  color: #212529;
+}
+
+/* Severidad Baja */
+.severity-low {
+  background-color: #28a745; // verde
+  color: #fff;
+}
+
+/* Sin severidad / desconocida */
+.severity-none {
+  background-color: #6c757d; // gris
+  color: #fff;
+}
+
+.severity-score {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #6c757d;
 }
 
 @keyframes spin {

@@ -50,7 +50,7 @@ export default function VehicleDetail() {
     setError('');
     setMessage('');
     try {
-      const data = await vehicleService.getById(id); // GET /api/v1/vehicles/{id}
+      const data = await vehicleService.getById(id); // GET /vehicles/{id}
       setVehicle(data);
     } catch (err) {
       console.error(err);
@@ -67,7 +67,6 @@ export default function VehicleDetail() {
     setError('');
     try {
       const res = await vehicleService.syncRecalls(id); // POST /vehicles/{id}/recalls/sync
-      // si el backend devuelve irv_value / irv_level, los mergeamos
       if (res && typeof res === 'object') {
         setVehicle((prev) => ({
           ...(prev || {}),
@@ -99,7 +98,7 @@ export default function VehicleDetail() {
     setMessage('');
     setError('');
     try {
-      const res = await vehicleService.calculateIRV(id, true); // POST /vehicles/{id}/irv/calculate?include_breakdown=true
+      const res = await vehicleService.calculateIRV(id, true); // POST /vehicles/{id}/irv/calculate
       if (res && typeof res === 'object') {
         setVehicle((prev) => ({
           ...(prev || {}),
@@ -124,6 +123,8 @@ export default function VehicleDetail() {
     }
   };
 
+  // ---------- RENDER ----------
+
   if (loading) return <Loading />;
 
   if (!vehicle) {
@@ -137,7 +138,7 @@ export default function VehicleDetail() {
     );
   }
 
-  // Datos de IRV
+  // 👇 A partir de aquí YA EXISTE `vehicle`, así que no peta
   const hasIrv =
     typeof vehicle.irv_value === 'number' ||
     (vehicle.irv_value !== null &&
@@ -147,6 +148,11 @@ export default function VehicleDetail() {
   const irvScore = hasIrv ? Number(vehicle.irv_value) : null;
   const levelClass = getIRVLevelClass(vehicle.irv_level);
   const levelText = getIRVLevelText(vehicle.irv_level);
+
+  const hasBreakdown =
+    vehicle.irv_breakdown &&
+    typeof vehicle.irv_breakdown === 'object' &&
+    Object.keys(vehicle.irv_breakdown).length > 0;
 
   return (
     <div className="vehicle-detail-page">
@@ -164,7 +170,7 @@ export default function VehicleDetail() {
       {message && <div className="alert alert-success">{message}</div>}
 
       <div className="vehicle-detail-layout">
-        {/* Card principal del vehículo */}
+        {/* Card principal */}
         <div className="vehicle-card vehicle-detail-card">
           <div className="vehicle-header">
             <h3>
@@ -233,22 +239,7 @@ export default function VehicleDetail() {
           </div>
         </div>
 
-        {/* Panel de breakdown IRV si existe */}
-        {vehicle.irv_breakdown && (
-          <div className="vehicle-detail-panel">
-            <h2>Detalle del IRV</h2>
-            <div className="irv-breakdown-grid">
-              {Object.entries(vehicle.irv_breakdown).map(([key, value]) => (
-                <div key={key} className="irv-breakdown-item">
-                  <span className="label">{key}</span>
-                  <span className="value">{String(value)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Link a Recalls */}
+        {/* Panel link a Recalls */}
         <div className="vehicle-detail-panel">
           <h2>Recalls del vehículo</h2>
           <p>
