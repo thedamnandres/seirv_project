@@ -712,3 +712,144 @@ body {
   background-color: #2563eb; /* azul */
   color: #fff;
 }
+
+/* ====== ESTILOS LISTA DE VEHÍCULOS / IRV ====== */
+
+.vehicles-page {
+  padding: 2rem;
+}
+
+.vehicles-page h1 {
+  margin-bottom: 1.5rem;
+}
+
+.vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card de vehículo */
+.vehicle-card {
+  background: #111827;      /* gris oscuro bonitito */
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.vehicle-card-header h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.vehicle-card-header span {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Bloque IRV */
+.irv-display {
+  text-align: center;
+  margin: 1.25rem 0;
+}
+
+.irv-value {
+  font-size: 2.4rem;
+  font-weight: 700;
+}
+
+.irv-badge {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Niveles IRV */
+.irv-level-bajo {
+  background-color: #10b981; /* verde */
+  color: #fff;
+}
+
+.irv-level-medio {
+  background-color: #f59e0b; /* amarillo */
+  color: #fff;
+}
+
+.irv-level-alto {
+  background-color: #ef4444; /* rojo */
+  color: #fff;
+}
+
+.irv-level-sin-recalls {
+  background-color: #6b7280; /* gris */
+  color: #fff;
+}
+
+/* Footer card */
+.vehicle-card-footer {
+  margin-top: 0.75rem;
+}
+
+.vehicle-card-footer p {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.vehicle-card-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.vehicle-card-actions button {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* FIX para que el número IRV sea visible */
+.irv-value {
+  font-size: 2.6rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  color: #ffffff !important;  /* <--- EL FIX REAL */
+  opacity: 1 !important;       /* por si estaba en 0 */
+  background: transparent !important;
+  text-shadow: none !important;
+}
+
+/* Estilos para info de vehículo */
+
+.vehicle-info {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.vehicle-info .info-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+/* Etiquetas (Placa:, Kilometraje:, Categoría:) */
+.vehicle-info .label {
+  color: #9ca3af; /* gris clarito */
+}
+
+/* Valores (GAY-2233, 23.232 km, Deportivo) */
+.vehicle-card .value {
+  color: #f9fafb !important;  /* <-- aquí el fix real */
+  font-weight: 600;
+}
