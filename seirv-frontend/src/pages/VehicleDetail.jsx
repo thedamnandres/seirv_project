@@ -1,10 +1,9 @@
-// src/pages/VehicleDetail.jsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Loading from '../components/Loading';
 import { vehicleService } from '../services/api';
 
-// Helpers reutilizados para IRV
+// Helpers para IRV (mismos que en Vehicles.jsx)
 const getIRVLevelClass = (irvLevel) => {
   if (!irvLevel) return 'irv-level-sin-recalls';
 
@@ -34,8 +33,10 @@ export default function VehicleDetail() {
 
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const [syncLoading, setSyncLoading] = useState(false);
   const [irvLoading, setIrvLoading] = useState(false);
+
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -47,8 +48,9 @@ export default function VehicleDetail() {
   const loadVehicle = async () => {
     setLoading(true);
     setError('');
+    setMessage('');
     try {
-      const data = await vehicleService.getById(id);
+      const data = await vehicleService.getById(id); // GET /api/v1/vehicles/{id}
       setVehicle(data);
     } catch (err) {
       console.error(err);
@@ -59,34 +61,64 @@ export default function VehicleDetail() {
   };
 
   const handleSyncRecalls = async () => {
+    if (!vehicle) return;
     setSyncLoading(true);
     setMessage('');
     setError('');
     try {
-      const res = await vehicleService.syncRecalls(id);
-      // Sea que el backend devuelva el vehículo completo o sólo algunos campos, mergeamos
-      setVehicle((prev) => ({ ...(prev || {}), ...(res || {}) }));
-      setMessage('Recalls sincronizados correctamente.');
+      const res = await vehicleService.syncRecalls(id); // POST /vehicles/{id}/recalls/sync
+      // si el backend devuelve irv_value / irv_level, los mergeamos
+      if (res && typeof res === 'object') {
+        setVehicle((prev) => ({
+          ...(prev || {}),
+          irv_value: res.irv_value ?? prev?.irv_value,
+          irv_raw: res.irv_raw ?? prev?.irv_raw,
+          irv_level: res.irv_level ?? prev?.irv_level,
+          last_irv_calculation:
+            res.last_calculation ?? prev?.last_irv_calculation,
+        }));
+      }
+      setMessage(res?.message || 'Recalls sincronizados correctamente.');
     } catch (err) {
       console.error(err);
-      setError('Error al sincronizar los recalls');
+      if (err.response?.status === 404) {
+        setError(
+          'La sincronización de recalls aún no está disponible en el backend (404).'
+        );
+      } else {
+        setError('Error al sincronizar los recalls');
+      }
     } finally {
       setSyncLoading(false);
     }
   };
 
   const handleRecalcIRV = async () => {
+    if (!vehicle) return;
     setIrvLoading(true);
     setMessage('');
     setError('');
     try {
-      const res = await vehicleService.calculateIRV(id, true); // includeBreakdown = true
-      // Igual: merge con lo que venga (irv_value, irv_level, breakdown, etc.)
-      setVehicle((prev) => ({ ...(prev || {}), ...(res || {}) }));
+      const res = await vehicleService.calculateIRV(id, true); // POST /vehicles/{id}/irv/calculate?include_breakdown=true
+      if (res && typeof res === 'object') {
+        setVehicle((prev) => ({
+          ...(prev || {}),
+          irv_value: res.irv_value ?? prev?.irv_value,
+          irv_raw: res.irv_raw ?? prev?.irv_raw,
+          irv_level: res.irv_level ?? prev?.irv_level,
+          last_irv_calculation:
+            res.last_calculation ?? prev?.last_irv_calculation,
+          irv_breakdown: res.breakdown ?? prev?.irv_breakdown,
+        }));
+      }
       setMessage('IRV recalculado correctamente.');
     } catch (err) {
       console.error(err);
-      setError('Error al recalcular el IRV');
+      if (err.response?.status === 404) {
+        setError('El recálculo de IRV aún no está disponible en el backend (404).');
+      } else {
+        setError('Error al recalcular el IRV');
+      }
     } finally {
       setIrvLoading(false);
     }
@@ -105,6 +137,7 @@ export default function VehicleDetail() {
     );
   }
 
+  // Datos de IRV
   const hasIrv =
     typeof vehicle.irv_value === 'number' ||
     (vehicle.irv_value !== null &&
@@ -131,7 +164,7 @@ export default function VehicleDetail() {
       {message && <div className="alert alert-success">{message}</div>}
 
       <div className="vehicle-detail-layout">
-        {/* Card principal con IRV */}
+        {/* Card principal del vehículo */}
         <div className="vehicle-card vehicle-detail-card">
           <div className="vehicle-header">
             <h3>
@@ -170,6 +203,14 @@ export default function VehicleDetail() {
                 <span className="value">{vehicle.total_recalls}</span>
               </div>
             )}
+            {vehicle.last_irv_calculation && (
+              <div className="info-item">
+                <span className="label">Último cálculo IRV:</span>
+                <span className="value">
+                  {new Date(vehicle.last_irv_calculation).toLocaleString()}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="vehicle-actions">
@@ -179,7 +220,7 @@ export default function VehicleDetail() {
               onClick={handleSyncRecalls}
               disabled={syncLoading || irvLoading}
             >
-              {syncLoading ? 'Sincronizando...' : 'Sincronizar Recalls'}
+              {syncLoading ? 'Sincronizando...' : '🔄 Sincronizar Recalls'}
             </button>
             <button
               type="button"
@@ -187,26 +228,32 @@ export default function VehicleDetail() {
               onClick={handleRecalcIRV}
               disabled={irvLoading || syncLoading}
             >
-              {irvLoading ? 'Recalculando IRV...' : 'Recalcular IRV'}
+              {irvLoading ? 'Recalculando IRV...' : '⚙️ Recalcular IRV'}
             </button>
           </div>
         </div>
 
-        {/* Panel opcional para breakdown de IRV o lista de recalls */}
+        {/* Panel de breakdown IRV si existe */}
         {vehicle.irv_breakdown && (
           <div className="vehicle-detail-panel">
-            <h2>Detalle de IRV</h2>
-            <pre className="irv-breakdown">
-              {JSON.stringify(vehicle.irv_breakdown, null, 2)}
-            </pre>
+            <h2>Detalle del IRV</h2>
+            <div className="irv-breakdown-grid">
+              {Object.entries(vehicle.irv_breakdown).map(([key, value]) => (
+                <div key={key} className="irv-breakdown-item">
+                  <span className="label">{key}</span>
+                  <span className="value">{String(value)}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
+        {/* Link a Recalls */}
         <div className="vehicle-detail-panel">
-          <h2>Ver Recalls</h2>
+          <h2>Recalls del vehículo</h2>
           <p>
-            Puedes revisar el detalle de recalls de este vehículo en la sección{' '}
-            <Link to="/recalls">Recalls</Link>.
+            Puedes consultar el detalle de los recalls de este vehículo en la
+            sección <Link to="/recalls">Recalls</Link>.
           </p>
         </div>
       </div>
