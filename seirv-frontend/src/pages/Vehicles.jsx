@@ -41,7 +41,7 @@ export default function Vehicles() {
     setError('');
     try {
       const data = await vehicleService.getAll(); // GET /api/v1/vehicles
-      console.log('DEBUG vehicles:', data); // <--- quitar luego si quieres
+      console.log('DEBUG vehicles:', data);
       setVehicles(data || []);
     } catch (err) {
       console.error(err);
@@ -118,7 +118,9 @@ export default function Vehicles() {
                 <div className="vehicle-info">
                   <div className="info-item">
                     <span className="label">Placa:</span>
-                    <span className="value">{vehicle.license_plate || 'N/A'}</span>
+                    <span className="value">
+                      {vehicle.license_plate || 'N/A'}
+                    </span>
                   </div>
                   <div className="info-item">
                     <span className="label">Kilometraje:</span>
@@ -130,7 +132,9 @@ export default function Vehicles() {
                   </div>
                   <div className="info-item">
                     <span className="label">Categoría:</span>
-                    <span className="value">{vehicle.category_name || 'N/A'}</span>
+                    <span className="value">
+                      {vehicle.category_name || 'N/A'}
+                    </span>
                   </div>
                   {typeof vehicle.total_recalls === 'number' && (
                     <div className="info-item">
@@ -141,10 +145,12 @@ export default function Vehicles() {
                 </div>
 
                 <div className="vehicle-actions">
-                  {/* Aquí puedes habilitar detalle cuando exista la ruta */}
-                  {/* <Link to={`/vehicles/${vehicle.id}`} className="btn btn-outline btn-sm">
+                  <Link
+                    to={`/vehicles/${vehicle.id}`}
+                    className="btn btn-outline btn-sm"
+                  >
                     Ver detalle
-                  </Link> */}
+                  </Link>
                   <button
                     type="button"
                     onClick={() => handleDelete(vehicle.id)}
