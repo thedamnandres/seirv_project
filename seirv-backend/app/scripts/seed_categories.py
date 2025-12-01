@@ -18,14 +18,46 @@ def seed_categories():
     db = SessionLocal()
     
     categories_data = [
-        {"name": "Sedán", "description": "Vehículos de pasajeros de 4 puertas"},
-        {"name": "SUV", "description": "Vehículos utilitarios deportivos"},
-        {"name": "Crossover", "description": "SUVs compactos urbanos"},
-        {"name": "Hatchback", "description": "Compactos y subcompactos"},
-        {"name": "Van", "description": "Vehículos comerciales"},
-        {"name": "Lujo", "description": "Vehículos premium/ejecutivos"},
-        {"name": "Pickup", "description": "Camionetas pickup"},
-        {"name": "Deportivo", "description": "Alto rendimiento"},
+        {
+            "name": "Sedán", 
+            "description": "Vehículos de pasajeros de 4 puertas",
+            "avg_recalls": 3.5  
+        },
+        {
+            "name": "SUV", 
+            "description": "Vehículos utilitarios deportivos",
+            "avg_recalls": 4.0  
+        },
+        {
+            "name": "Crossover", 
+            "description": "SUVs compactos urbanos",
+            "avg_recalls": 2.8  
+        },
+        {
+            "name": "Hatchback", 
+            "description": "Compactos y subcompactos",
+            "avg_recalls": 2.5
+        },
+        {
+            "name": "Van", 
+            "description": "Vehículos comerciales",
+            "avg_recalls": 2.0
+        },
+        {
+            "name": "Lujo", 
+            "description": "Vehículos premium/ejecutivos",
+            "avg_recalls": 1.8
+        },
+        {
+            "name": "Pickup", 
+            "description": "Camionetas pickup",
+            "avg_recalls": 3.8
+        },
+        {
+            "name": "Deportivo", 
+            "description": "Alto rendimiento",
+            "avg_recalls": 1.5
+        },
     ]
     
     try:
@@ -36,16 +68,30 @@ def seed_categories():
             ).first()
             
             if existing:
-                print(f"✓ '{cat_data['name']}' ya existe")
+                # Actualizar avg_recalls si no tiene valor o es 0
+                if existing.avg_recalls == 0.0 or existing.avg_recalls is None:
+                    existing.avg_recalls = cat_data.get("avg_recalls", 0.0)
+                    print(f"✓ '{cat_data['name']}' actualizada con avg_recalls = {cat_data.get('avg_recalls', 0.0)}")
+                else:
+                    print(f"✓ '{cat_data['name']}' ya existe con avg_recalls = {existing.avg_recalls}")
                 continue
             
-            # Crear
+            # Crear nueva categoría
             category = Category(**cat_data)
             db.add(category)
-            print(f"✓ Creada: {cat_data['name']}")
+            print(f"✓ Creada: {cat_data['name']} (avg_recalls = {cat_data.get('avg_recalls', 0.0)})")
         
         db.commit()
-        print("\nCategorías pobladas exitosamente!")
+        print("\n Categorías pobladas/actualizadas exitosamente!")
+        print("\n Valores de avg_recalls asignados:")
+        print("   - SUV: 4.0 (muy populares, alta complejidad)")
+        print("   - Pickup: 3.8 (muy populares, muchos modelos)")
+        print("   - Sedán: 3.5 (alto volumen, muchos modelos)")
+        print("   - Crossover: 2.8 (similar a SUV pero más nuevos)")
+        print("   - Hatchback: 2.5 (menos complejos)")
+        print("   - Van: 2.0 (menos modelos)")
+        print("   - Lujo: 1.8 (mejor control de calidad)")
+        print("   - Deportivo: 1.5 (menos modelos, especializados)")
         
     except Exception as e:
         db.rollback()

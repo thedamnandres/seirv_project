@@ -32,15 +32,10 @@ class IRVService:
     def calculate_time_weight(report_date: Optional[datetime]) -> float:
         """
         Calcula el Peso_Tiempo basado en días desde la fecha del recall
-        
-        Reglas:
-        - < 90 días    → 1.0
-        - 90–180 días  → 1.2
-        - > 180 días   → 1.5
 
         """
         if not report_date:
-            return 1.5
+            return 2.0  # Sin fecha, asumir muy antiguo
         
         # Calcular días desde la fecha del recall
         if report_date.tzinfo:
@@ -51,24 +46,24 @@ class IRVService:
         
         days_elapsed = (now - report_date).days
         
-        # Reglas
+        # Reglas mejoradas con más rangos
         if days_elapsed < 90:
             return 1.0
         elif days_elapsed <= 180:
             return 1.2
-        else:  
-            return 1.5
+        elif days_elapsed <= 365:  # Menos de 1 año
+            return 1.4
+        elif days_elapsed <= 730:  # 1-2 años
+            return 1.6
+        elif days_elapsed <= 1095:  # 2-3 años
+            return 1.8
+        else:  # Más de 3 años
+            return 2.0
     
     @staticmethod
     def calculate_mileage_factor(mileage: int) -> float:
         """
         Calcula el Factor_Kilometraje basado en el kilometraje del vehículo
-        
-        Reglas:
-        - < 70,000 km           → 1.0
-        - 70,000–120,000 km     → 1.15
-        - 120,000–200,000 km    → 1.35
-        - > 200,000 km          → 1.5
         
         """
         if mileage < 70000:
@@ -77,8 +72,12 @@ class IRVService:
             return 1.15
         elif mileage < 200000:
             return 1.35
-        else:  
-            return 1.5
+        elif mileage < 300000:
+            return 1.6
+        elif mileage < 400000:
+            return 1.85
+        else:  # >= 400,000 km
+            return 2.0
     
     @classmethod
     def calculate_category_factor(
@@ -228,10 +227,23 @@ class IRVService:
                 if recall_count > 0:
                     vehicles_with_recalls += 1
             
-            if vehicles_with_recalls > 0:
+            # Solo actualizar si hay suficientes datos (mínimo 5 vehículos con recalls)
+            # Esto evita sobrescribir los valores iniciales con datos insuficientes
+            if vehicles_with_recalls >= 5:
                 new_avg = total_recalls_category / vehicles_with_recalls
                 category.avg_recalls = new_avg
                 db.commit()
+                logger.info(
+                    f"Promedio de categoría '{category.name}' actualizado a {new_avg:.2f} "
+                    f"(basado en {vehicles_with_recalls} vehículos con recalls)"
+                )
+            elif vehicles_with_recalls > 0:
+                # Si hay datos pero insuficientes, loguear pero no actualizar
+                calculated_avg = total_recalls_category / vehicles_with_recalls
+                logger.debug(
+                    f"Promedio calculado para '{category.name}': {calculated_avg:.2f} "
+                    f"(solo {vehicles_with_recalls} vehículos, usando valor inicial: {category.avg_recalls})"
+                )
         
         # Calcular IRV_crudo
         irv_raw = average_severity_time * category_factor * mileage_factor
@@ -264,10 +276,6 @@ class IRVService:
     def normalize_irv(cls, irv_raw: float) -> int:
         """
         Normaliza el IRV crudo a un valor entre 0 y 100
-        
-        Fórmula: IRV = ( IRV_crudo / IRV_max_teorico ) * 100
-        
-        El resultado se redondea sin decimales y se limita entre 0 y 100.
 
         """
         if irv_raw <= 0:
@@ -285,12 +293,6 @@ class IRVService:
     def determine_irv_level(irv_normalized: int) -> str:
         """
         Determina el nivel de riesgo basado en el valor IRV normalizado (0-100)
-        
-        Clasificación:
-        - 0: Sin Recalls
-        - 1-33: Bajo
-        - 34-66: Medio
-        - 67-100: Alto
         
         """
         if irv_normalized == 0:

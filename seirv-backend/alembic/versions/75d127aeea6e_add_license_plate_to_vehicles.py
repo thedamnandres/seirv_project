@@ -25,29 +25,29 @@ def upgrade() -> None:
     columns = [col['name'] for col in inspector.get_columns('vehicles')]
     
     if 'license_plate' not in columns:
-        # Paso 1: Agregar columna como nullable primero
-        op.add_column('vehicles', sa.Column('license_plate', sa.String(length=8), nullable=True))
-        
-        # Paso 2: Asignar valores temporales a registros existentes (si los hay)
-        # Genera placas únicas temporales: XXX-0001, XXX-0002, etc.
-        op.execute("""
-            UPDATE vehicles 
-            SET license_plate = 'XXX-' || LPAD(id::text, 4, '0')
-            WHERE license_plate IS NULL
-        """)
-        
-        # Paso 3: Ahora hacer la columna NOT NULL
-        op.alter_column('vehicles', 'license_plate', nullable=False)
+    # Paso 1: Agregar columna como nullable primero
+    op.add_column('vehicles', sa.Column('license_plate', sa.String(length=8), nullable=True))
+    
+    # Paso 2: Asignar valores temporales a registros existentes (si los hay)
+    # Genera placas únicas temporales: XXX-0001, XXX-0002, etc.
+    op.execute("""
+        UPDATE vehicles 
+        SET license_plate = 'XXX-' || LPAD(id::text, 4, '0')
+        WHERE license_plate IS NULL
+    """)
+    
+    # Paso 3: Ahora hacer la columna NOT NULL
+    op.alter_column('vehicles', 'license_plate', nullable=False)
     
     # Verificar si el índice ya existe
     indexes = [idx['name'] for idx in inspector.get_indexes('vehicles')]
     if 'ix_vehicles_license_plate' not in indexes:
-        op.create_index(op.f('ix_vehicles_license_plate'), 'vehicles', ['license_plate'], unique=False)
+    op.create_index(op.f('ix_vehicles_license_plate'), 'vehicles', ['license_plate'], unique=False)
     
     # Verificar si el constraint ya existe
     constraints = [c['name'] for c in inspector.get_unique_constraints('vehicles')]
     if 'unique_license_plate' not in constraints:
-        op.create_unique_constraint('unique_license_plate', 'vehicles', ['license_plate'])
+    op.create_unique_constraint('unique_license_plate', 'vehicles', ['license_plate'])
 
 
 def downgrade() -> None:

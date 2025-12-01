@@ -13,8 +13,9 @@ const Register = lazy(() => import('./pages/Register'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Vehicles = lazy(() => import('./pages/Vehicles'));
 const VehicleForm = lazy(() => import('./pages/VehicleForm'));
-const VehicleDetail = lazy(() => import('./pages/VehicleDetail'));   // <-- NUEVO
+const VehicleDetail = lazy(() => import('./pages/VehicleDetail'));
 const Recalls = lazy(() => import('./pages/Recalls'));
+const EditProfile = lazy(() => import('./pages/EditProfile'));
 const UsersManagement = lazy(() => import('./pages/UsersManagement'));
 const AdminRecalls = lazy(() => import('./pages/AdminRecalls'));
 const AdminRecallDetail = lazy(() => import('./pages/AdminRecallDetail'));
@@ -79,6 +80,15 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <Recalls />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/profile/edit"
+            element={
+              <PrivateRoute>
+                <EditProfile />
               </PrivateRoute>
             }
           />

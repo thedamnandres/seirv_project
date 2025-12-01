@@ -44,8 +44,15 @@ export const vehicleService = {
     await apiClient.delete(`/vehicles/${id}`);
   },
 
-  async getRecalls(vehicleId) {
-    const res = await apiClient.get(`/vehicles/${vehicleId}/recalls`);
+  async update(id, payload) {
+    const res = await apiClient.put(`/vehicles/${id}`, payload);
+    return res.data;
+  },
+
+  async getRecalls(vehicleId, useCache = true) {
+    const res = await apiClient.get(`/vehicles/${vehicleId}/recalls`, {
+      params: { use_cache: useCache },
+    });
     return res.data;
   },
 
@@ -77,6 +84,18 @@ export const vehicleService = {
 
 // ======================= USERS =======================
 export const userService = {
+  // Perfil del usuario actual
+  async getProfile() {
+    const res = await apiClient.get('/users/me');
+    return res.data;
+  },
+
+  async updateProfile(payload) {
+    const res = await apiClient.put('/users/me', payload);
+    return res.data;
+  },
+
+  // Admin: gestión de usuarios
   async getAll(skip = 0, limit = 100) {
     const res = await apiClient.get('/users/admin/all', {
       params: { skip, limit },

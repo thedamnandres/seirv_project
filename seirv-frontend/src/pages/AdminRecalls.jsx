@@ -27,7 +27,6 @@ export default function AdminRecalls() {
   const [recall, setRecall] = useState(null);
 
   const [severity, setSeverity] = useState('');
-  const [severityScore, setSeverityScore] = useState('');
   const [notes, setNotes] = useState('');
 
   const [loading, setLoading] = useState(false);
@@ -54,11 +53,6 @@ export default function AdminRecalls() {
       setRecall(data);
       // precargar formulario con valores actuales
       setSeverity(data.severity ?? '');
-      setSeverityScore(
-        typeof data.severity_score === 'number'
-          ? String(data.severity_score)
-          : ''
-      );
       setNotes(data.notes ?? '');
     } catch (err) {
       console.error(err);
@@ -88,9 +82,9 @@ export default function AdminRecalls() {
         severity: Number(severity),
       };
 
-      if (severityScore) {
-        payload.severity_score = Number(severityScore);
-      }
+      // El severity_score se calcula automáticamente en el backend
+      // basado en el nivel de severidad (1 -> 1.0, 2 -> 2.0, 3 -> 3.0)
+      
       if (notes.trim()) {
         payload.notes = notes.trim();
       }
@@ -103,6 +97,11 @@ export default function AdminRecalls() {
 
       setRecall(updated);
       setSuccess('Severidad actualizada correctamente y IRV recalculado.');
+      
+      // Disparar evento personalizado para que VehicleDetail recargue los recalls
+      window.dispatchEvent(new CustomEvent('recallSeverityUpdated', {
+        detail: { recallId: recall.id, vehicleId: recall.vehicle_id }
+      }));
     } catch (err) {
       console.error(err);
       const detail =
@@ -201,8 +200,8 @@ export default function AdminRecalls() {
               )}
               {typeof recall.severity_score === 'number' && (
                 <p>
-                  <strong>Score actual:</strong>{' '}
-                  {recall.severity_score.toFixed(1)}
+                  <strong>Score calculado:</strong>{' '}
+                  {recall.severity_score.toFixed(1)} (automático)
                 </p>
               )}
               {recall.report_received_date && (
@@ -237,20 +236,11 @@ export default function AdminRecalls() {
 
           {/* Columna: formulario de severidad */}
           <div className="admin-recall-form-card">
-            <div className="admin-recall-form-header">
-              <h2>Editar severidad</h2>
-              <button
-                type="button"
-                className="btn btn-outline btn-sm"
-                onClick={() => navigate(`/admin/recalls/${recall.id}/edit`)}
-              >
-                Abrir página de edición
-              </button>
-            </div>
-
+            <h2>Editar severidad</h2>
             <p className="admin-recall-form-hint">
-              Ajusta el nivel de severidad (1 = Bajo, 2 = Medio, 3 = Alto). Al
-              guardar, se recalculará el IRV del vehículo.
+              Ajusta el nivel de severidad (1 = Bajo, 2 = Medio, 3 = Alto). 
+              El score de severidad se calculará automáticamente en el backend. 
+              Al guardar, se recalculará el IRV del vehículo.
             </p>
 
             <form
@@ -270,23 +260,6 @@ export default function AdminRecalls() {
                   <option value="2">2 — Media</option>
                   <option value="3">3 — Alta</option>
                 </select>
-              </div>
-
-              <div className="field-group">
-                <label htmlFor="severity-score">
-                  Score de severidad (1.0 – 5.0)
-                  <span className="field-hint">Opcional</span>
-                </label>
-                <input
-                  id="severity-score"
-                  type="number"
-                  step="0.1"
-                  min="1"
-                  max="5"
-                  value={severityScore}
-                  onChange={(e) => setSeverityScore(e.target.value)}
-                  placeholder="Ej: 3.5"
-                />
               </div>
 
               <div className="field-group">

@@ -51,16 +51,6 @@ export default function Vehicles() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Seguro que deseas eliminar este vehículo?')) return;
-    try {
-      await vehicleService.delete(id); // DELETE /vehicles/{id}
-      await loadVehicles();
-    } catch (err) {
-      console.error(err);
-      setError('No se pudo eliminar el vehículo');
-    }
-  };
 
   if (loading) return <Loading />;
 
@@ -151,13 +141,6 @@ export default function Vehicles() {
                   >
                     Ver detalle
                   </Link>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(vehicle.id)}
-                    className="btn btn-danger btn-sm"
-                  >
-                    Eliminar
-                  </button>
                 </div>
               </div>
             );

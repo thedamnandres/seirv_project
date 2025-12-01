@@ -21,16 +21,50 @@ class RecallSyncService:
     def parse_date(date_str: Optional[str]) -> Optional[datetime]:
         """
         Parsea una fecha de string a datetime
+        
+        Soporta múltiples formatos:
+        - ISO: "2023-01-15" o "2023-01-15T00:00:00"
+        - DD/MM/YYYY: "01/12/2021"
+        - MM/DD/YYYY: "12/01/2021" (formato alternativo)
         """
         if not date_str:
             return None
         
+        # Limpiar espacios
+        date_str = date_str.strip()
+        
         try:
-            # NHTSA puede retornar fechas en formato: "2023-01-15" o "2023-01-15T00:00:00"
+            # Formato ISO con tiempo: "2023-01-15T00:00:00" o "2023-01-15T00:00:00Z"
             if 'T' in date_str:
                 return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-            else:
+            
+            # Formato ISO simple: "2023-01-15"
+            if '-' in date_str and len(date_str.split('-')[0]) == 4:
                 return datetime.strptime(date_str, "%Y-%m-%d")
+            
+            # Formato DD/MM/YYYY: "01/12/2021"
+            if '/' in date_str:
+                parts = date_str.split('/')
+                if len(parts) == 3:
+                    # Intentar DD/MM/YYYY primero (más común en formato internacional)
+                    try:
+                        day, month, year = parts
+                        # Validar que sea DD/MM/YYYY (día <= 31, mes <= 12)
+                        if int(day) <= 31 and int(month) <= 12:
+                            return datetime.strptime(date_str, "%d/%m/%Y")
+                    except (ValueError, IndexError):
+                        pass
+                    
+                    # Si falla, intentar MM/DD/YYYY (formato americano)
+                    try:
+                        return datetime.strptime(date_str, "%m/%d/%Y")
+                    except ValueError:
+                        pass
+            
+            # Si ningún formato funciona, loguear y retornar None
+            logger.warning(f"No se pudo parsear la fecha en formato reconocido: {date_str}")
+            return None
+            
         except Exception as e:
             logger.warning(f"Error parseando fecha {date_str}: {e}")
             return None
@@ -98,10 +132,16 @@ class RecallSyncService:
                     )
                     existing_recall.last_synced_at = func.now()
                     
-                    # Recalcular severidad por si cambió el contenido
-                    severity, score = RecallSeverityService.calculate_severity(recall_data)
-                    existing_recall.severity = severity
-                    existing_recall.severity_score = score
+                    # IMPORTANTE: NO sobrescribir severity ni severity_score si fueron editados manualmente
+                    # Solo actualizar si no tienen valor (recalls nuevos sin severidad asignada)
+                    # Si un admin editó la severidad, mantenerla
+                    if existing_recall.severity is None:
+                        # Solo calcular severidad si no tiene valor asignado
+                        severity, score = RecallSeverityService.calculate_severity(recall_data)
+                        existing_recall.severity = severity
+                        existing_recall.severity_score = score
+                    # Si ya tiene severity, mantenerlo (fue editado por admin o ya calculado)
+                    # El severity_score se mantiene igual, no se recalcula
                     
                     stats["updated"] += 1
                 else:

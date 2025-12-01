@@ -29,7 +29,6 @@ export default function AdminRecallEdit() {
 
   const [recall, setRecall] = useState(null);
   const [severity, setSeverity] = useState('');
-  const [severityScore, setSeverityScore] = useState('');
   const [notes, setNotes] = useState('');
 
   const [loading, setLoading] = useState(true);
@@ -53,11 +52,6 @@ export default function AdminRecallEdit() {
         const data = await adminRecallsService.getById(idNumber);
         setRecall(data);
         setSeverity(data.severity ?? '');
-        setSeverityScore(
-          typeof data.severity_score === 'number'
-            ? String(data.severity_score)
-            : ''
-        );
         setNotes(data.notes ?? '');
       } catch (err) {
         console.error(err);
@@ -90,9 +84,9 @@ export default function AdminRecallEdit() {
         severity: Number(severity),
       };
 
-      if (severityScore) {
-        payload.severity_score = Number(severityScore);
-      }
+      // El severity_score se calcula automáticamente en el backend
+      // basado en el nivel de severidad (1 -> 1.0, 2 -> 2.0, 3 -> 3.0)
+      
       if (notes.trim()) {
         payload.notes = notes.trim();
       }
@@ -188,7 +182,7 @@ export default function AdminRecallEdit() {
             )}
             {typeof recall.severity_score === 'number' && (
               <p>
-                <strong>Score actual:</strong> {recall.severity_score.toFixed(1)}
+                <strong>Score calculado:</strong> {recall.severity_score.toFixed(1)} (automático)
               </p>
             )}
           </div>
@@ -219,8 +213,9 @@ export default function AdminRecallEdit() {
         <div className="admin-recall-form-card">
           <h2>Editar severidad</h2>
           <p className="admin-recall-form-hint">
-            Selecciona el nivel 1–3 y opcionalmente ajusta el score (1.0–5.0) y
-            las notas internas. El IRV se recalculará automáticamente.
+            Selecciona el nivel de severidad (1 = Bajo, 2 = Medio, 3 = Alto). 
+            El score de severidad se calculará automáticamente en el backend. 
+            El IRV se recalculará automáticamente al guardar.
           </p>
 
           <form onSubmit={handleSave} className="admin-recall-form">
@@ -258,23 +253,6 @@ export default function AdminRecallEdit() {
                   <span>Alta (3)</span>
                 </label>
               </div>
-            </div>
-
-            <div className="field-group">
-              <label htmlFor="severity-score">
-                Score (1.0–5.0, opcional)
-              </label>
-              <input
-                id="severity-score"
-                type="number"
-                step="0.1"
-                min="1"
-                max="5"
-                value={severityScore}
-                onChange={(e) => setSeverityScore(e.target.value)}
-                placeholder="Ej: 3.6"
-              />
-              <small>Déjalo vacío si no quieres modificar el score.</small>
             </div>
 
             <div className="field-group">

@@ -353,6 +353,43 @@
     }
 }
 
+.severity-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.severity-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.severity-edit-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.severity-select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: white;
+  min-width: 120px;
+}
+
+.severity-edit-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.severity-edit-btn {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.75rem;
+}
+
 .severity-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;

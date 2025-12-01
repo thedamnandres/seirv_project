@@ -180,12 +180,20 @@ const register = async ({ full_name, username, email, password }) => {
     }
   };
 
+  const updateUser = (userData) => {
+    // Normalizar el rol
+    if (userData) userData.role = normalizeRole(userData.role);
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
     refreshUser,
+    updateUser,
     isAuthenticated: !!user,
     loading,
   };

@@ -232,11 +232,11 @@ export default function Recalls() {
                                   recall.campaign_number ||
                                   'N/A'}
                               </span>
-                              <span className="recall-date">
-                                {recall.ReportReceivedDate ||
-                                  recall.date ||
-                                  'Fecha no disponible'}
-                              </span>
+                              {(recall.ReportReceivedDate || recall.date) && (
+                                <span className="recall-date">
+                                  {recall.ReportReceivedDate || recall.date}
+                                </span>
+                              )}
                               <span
                                 className={`severity-badge ${severityCls}`}
                                 title={

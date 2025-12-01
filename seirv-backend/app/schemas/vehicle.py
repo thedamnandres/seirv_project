@@ -142,12 +142,14 @@ class VehicleDetailResponse(VehicleResponse):
     """
     irv_raw: Optional[float] = None  # IRV crudo
     total_recalls: int = 0  # Total de recalls del vehículo
+    irv_breakdown: Optional[dict] = None  # Breakdown del cálculo IRV con fórmulas
 
 
 class RecallItem(BaseModel):
     """
     Schema para un recall individual de NHTSA
     """
+    id: Optional[int] = None  # ID del recall en BD (para edición)
     NHTSACampaignNumber: Optional[str] = None
     Component: Optional[str] = None
     Summary: Optional[str] = None
