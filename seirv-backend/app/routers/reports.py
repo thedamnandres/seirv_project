@@ -108,3 +108,82 @@ def vehicles_by_type(
         "least_recalls_vehicle": vehicles[0],  # ya viene ordenado asc por recalls
         "vehicles": vehicles,
     }
+
+@router.get("/top-brands-by-recalls")
+def top_brands_by_recalls(
+    limit: int = Query(10, ge=1, le=50, description="Número de marcas a devolver"),
+    db: Session = Depends(get_db),
+):
+    rows = (
+        db.query(
+            Vehicle.make.label("make"),
+            func.count(Recall.id).label("total_recalls"),
+        )
+        .join(Recall, Recall.vehicle_id == Vehicle.id)
+        .group_by(Vehicle.make)
+        .order_by(func.count(Recall.id).desc(), Vehicle.make.asc())
+        .limit(limit)
+        .all()
+    )
+
+    # Si no hay recalls en la DB (tabla vacía), devuelve lista vacía
+    return {
+        "limit": limit,
+        "brands": [
+            {"make": r.make, "total_recalls": int(r.total_recalls)}
+            for r in rows
+        ],
+    }
+
+
+@router.get("/worst-vehicles-by-brand")
+def worst_vehicles_by_brand(
+    make: str = Query(..., description="Marca exacta (Vehicle.make), ej: Toyota"),
+    limit: int = Query(10, ge=1, le=100, description="Número de vehículos a devolver"),
+    db: Session = Depends(get_db),
+):
+    rows = (
+        db.query(
+            Vehicle.id.label("vehicle_id"),
+            Vehicle.make,
+            Vehicle.model,
+            Vehicle.year,
+            Category.name.label("type"),
+            func.count(Recall.id).label("recalls_count"),
+        )
+        .join(Category, Vehicle.category_id == Category.id)
+        .join(Recall, Recall.vehicle_id == Vehicle.id)  # join normal: solo los que tienen recalls
+        .filter(Vehicle.make == make)
+        .group_by(
+            Vehicle.id,
+            Vehicle.make,
+            Vehicle.model,
+            Vehicle.year,
+            Category.name,
+        )
+        .order_by(func.count(Recall.id).desc(), Vehicle.year.desc())
+        .limit(limit)
+        .all()
+    )
+
+    # Si no hay vehículos con recalls para esa marca, 404 o lista vacía (tú eliges).
+    # Yo prefiero lista vacía para no romper el front:
+    vehicles = [
+        {
+            "id": r.vehicle_id,
+            "make": r.make,
+            "model": r.model,
+            "year": r.year,
+            "type": r.type,
+            "recalls": int(r.recalls_count),
+        }
+        for r in rows
+    ]
+
+    return {
+        "make": make,
+        "limit": limit,
+        "count": len(vehicles),
+        "vehicles": vehicles,
+    }
+
