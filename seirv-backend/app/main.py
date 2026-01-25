@@ -38,10 +38,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from app.routers import reports
+
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(users.router, prefix=settings.API_V1_PREFIX)
 app.include_router(vehicles.router, prefix=settings.API_V1_PREFIX)
 app.include_router(vehicle_catalog.router, prefix=settings.API_V1_PREFIX)
+app.include_router(reports.router)
 
 
 @app.get("/")
