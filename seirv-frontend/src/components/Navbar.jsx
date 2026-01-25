@@ -54,6 +54,11 @@ export default function Navbar() {
                 Recalls
               </Link>
 
+              {/* ✅ NUEVO: Reportes */}
+              <Link to="/reports" className="nav-link">
+                Reportes
+              </Link>
+
               {isAdmin && (
                 <>
                   <Link to="/admin/recalls" className="nav-link">
@@ -113,3 +118,4 @@ export default function Navbar() {
     </nav>
   );
 }
+ 

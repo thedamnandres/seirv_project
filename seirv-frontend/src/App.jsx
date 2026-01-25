@@ -21,6 +21,9 @@ const AdminRecalls = lazy(() => import('./pages/AdminRecalls'));
 const AdminRecallDetail = lazy(() => import('./pages/AdminRecallDetail'));
 const AdminRecallEdit = lazy(() => import('./pages/AdminRecallEdit'));
 
+// ✅ NUEVO: Reports (puede ser normal o lazy; te lo dejo lazy para consistencia)
+const Reports = lazy(() => import('./pages/Reports'));
+
 function AppContent() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
@@ -65,7 +68,6 @@ function AppContent() {
             }
           />
 
-          {/* --- RUTA NUEVA: DETALLE DEL VEHÍCULO --- */}
           <Route
             path="/vehicles/:id"
             element={
@@ -93,6 +95,16 @@ function AppContent() {
             }
           />
 
+          {/* ✅ NUEVA RUTA: REPORTES (3 filtros) */}
+          <Route
+            path="/reports"
+            element={
+              <PrivateRoute>
+                <Reports />
+              </PrivateRoute>
+            }
+          />
+
           {/* Ruta solo admin */}
           <Route
             path="/admin/users"
@@ -102,7 +114,8 @@ function AppContent() {
               </AdminRoute>
             }
           />
-           <Route
+
+          <Route
             path="/admin/recalls"
             element={
               <AdminRoute>
@@ -111,7 +124,7 @@ function AppContent() {
             }
           />
 
-            {/* Detalle de recall */}
+          {/* Detalle de recall */}
           <Route
             path="/admin/recalls/:id"
             element={
@@ -127,15 +140,6 @@ function AppContent() {
             element={
               <AdminRoute>
                 <AdminRecallEdit />
-              </AdminRoute>
-            }
-          />
-
-          <Route
-            path="/admin/recalls/:id"
-            element={
-              <AdminRoute>
-                <AdminRecallDetail />
               </AdminRoute>
             }
           />
