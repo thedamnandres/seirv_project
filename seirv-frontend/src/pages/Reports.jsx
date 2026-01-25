@@ -2,6 +2,36 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { reportsService } from "../services/reportsService";
 
+// ================= UI Components (FUERA del componente principal) =================
+const Badge = ({ variant = "neutral", children }) => (
+  <span className={`badge badge-${variant}`}>{children}</span>
+);
+
+const Card = ({ title, subtitle, children, right }) => (
+  <section className="card">
+    <div className="card-header">
+      <div>
+        <h2 className="card-title">{title}</h2>
+        {subtitle ? <p className="card-subtitle">{subtitle}</p> : null}
+      </div>
+      {right ? <div className="card-right">{right}</div> : null}
+    </div>
+    <div className="card-body">{children}</div>
+  </section>
+);
+
+const StatCard = ({ label, main, hint, actions }) => (
+  <div className="stat-card">
+    <div>
+      <div className="stat-label">{label}</div>
+      <div className="stat-main">{main}</div>
+      {hint ? <div className="stat-hint">{hint}</div> : null}
+    </div>
+    {actions ? <div className="stat-actions">{actions}</div> : null}
+  </div>
+);
+
+// =============================== PAGE ===============================
 export default function Reports() {
   // ============= 1) Por tipo =============
   const [vehicleType, setVehicleType] = useState("SUV");
@@ -9,7 +39,7 @@ export default function Reports() {
   const [byTypeLoading, setByTypeLoading] = useState(false);
   const [byTypeError, setByTypeError] = useState(null);
 
-  const [sortKey, setSortKey] = useState("recalls"); // recalls|year|make|model
+  const [sortKey, setSortKey] = useState("recalls");
   const [sortDir, setSortDir] = useState("asc");
 
   // ============= 2) Por marca =============
@@ -31,17 +61,24 @@ export default function Reports() {
   const [safestLoading, setSafestLoading] = useState(false);
   const [safestError, setSafestError] = useState(null);
 
-  // Debounce simple para inputs (sin librerías)
-const debounceTimerBrand = useRef(null);
-const debounceTimerCombo = useRef(null);
+  // Debounce timers (refs, no re-render)
+  const debounceTimerBrand = useRef(null);
+  const debounceTimerCombo = useRef(null);
 
   // --------- load: por tipo ----------
   useEffect(() => {
+    // opcional: evita spamear si está vacío
+    if (!vehicleType?.trim()) {
+      setByType(null);
+      setByTypeError(null);
+      return;
+    }
+
     setByTypeLoading(true);
     setByTypeError(null);
 
     reportsService
-      .getVehiclesByType(vehicleType)
+      .getVehiclesByType(vehicleType.trim())
       .then(setByType)
       .catch((e) => setByTypeError(e?.response?.data?.detail || e.message))
       .finally(() => setByTypeLoading(false));
@@ -64,62 +101,65 @@ const debounceTimerCombo = useRef(null);
   }, []);
 
   // --------- load: worst vehicles by brand (debounced) ----------
-useEffect(() => {
-  if (!brandSelected?.trim()) return;
-
-  if (debounceTimerBrand.current) clearTimeout(debounceTimerBrand.current);
-
-  debounceTimerBrand.current = setTimeout(() => {
-    setWorstLoading(true);
-    setWorstError(null);
-
-    reportsService
-      .getWorstVehiclesByBrand(brandSelected.trim(), 10)
-      .then(setWorstByBrand)
-      .catch((e) => setWorstError(e?.response?.data?.detail || e.message))
-      .finally(() => setWorstLoading(false));
-  }, 400);
-
-  return () => {
-    if (debounceTimerBrand.current) clearTimeout(debounceTimerBrand.current);
-  };
-}, [brandSelected]);
-
-
-  // --------- load: safest (debounced) ----------
-useEffect(() => {
-  if (debounceTimerCombo.current) clearTimeout(debounceTimerCombo.current);
-
-  debounceTimerCombo.current = setTimeout(() => {
-    const t = comboType.trim();
-    const m = comboMake.trim();
-    const mo = comboModel.trim();
-
-    if (!t && !m && !mo) {
-      setSafest(null);
-      setSafestError(null);
+  useEffect(() => {
+    const value = brandSelected?.trim();
+    if (!value) {
+      setWorstByBrand(null);
+      setWorstError(null);
       return;
     }
 
-    setSafestLoading(true);
-    setSafestError(null);
+    if (debounceTimerBrand.current) clearTimeout(debounceTimerBrand.current);
 
-    reportsService
-      .getSafestVehicle({
-        vehicle_type: t || undefined,
-        make: m || undefined,
-        model: mo || undefined,
-      })
-      .then(setSafest)
-      .catch((e) => setSafestError(e?.response?.data?.detail || e.message))
-      .finally(() => setSafestLoading(false));
-  }, 450);
+    debounceTimerBrand.current = setTimeout(() => {
+      setWorstLoading(true);
+      setWorstError(null);
 
-  return () => {
+      reportsService
+        .getWorstVehiclesByBrand(value, 10)
+        .then(setWorstByBrand)
+        .catch((e) => setWorstError(e?.response?.data?.detail || e.message))
+        .finally(() => setWorstLoading(false));
+    }, 450);
+
+    return () => {
+      if (debounceTimerBrand.current) clearTimeout(debounceTimerBrand.current);
+    };
+  }, [brandSelected]);
+
+  // --------- load: safest (debounced) ----------
+  useEffect(() => {
     if (debounceTimerCombo.current) clearTimeout(debounceTimerCombo.current);
-  };
-}, [comboType, comboMake, comboModel]);
 
+    debounceTimerCombo.current = setTimeout(() => {
+      const t = comboType.trim();
+      const m = comboMake.trim();
+      const mo = comboModel.trim();
+
+      if (!t && !m && !mo) {
+        setSafest(null);
+        setSafestError(null);
+        return;
+      }
+
+      setSafestLoading(true);
+      setSafestError(null);
+
+      reportsService
+        .getSafestVehicle({
+          vehicle_type: t || undefined,
+          make: m || undefined,
+          model: mo || undefined,
+        })
+        .then(setSafest)
+        .catch((e) => setSafestError(e?.response?.data?.detail || e.message))
+        .finally(() => setSafestLoading(false));
+    }, 500);
+
+    return () => {
+      if (debounceTimerCombo.current) clearTimeout(debounceTimerCombo.current);
+    };
+  }, [comboType, comboMake, comboModel]);
 
   // --------- sorting table ----------
   function toggleSort(key) {
@@ -140,37 +180,9 @@ useEffect(() => {
       if (typeof va === "number" && typeof vb === "number") return (va - vb) * mul;
       return String(va).localeCompare(String(vb)) * mul;
     });
+
     return list;
   }, [byType, sortKey, sortDir]);
-
-  // --------- UI helpers ----------
-  const Badge = ({ variant = "neutral", children }) => (
-    <span className={`badge badge-${variant}`}>{children}</span>
-  );
-
-  const Card = ({ title, subtitle, children, right }) => (
-    <section className="card">
-      <div className="card-header">
-        <div>
-          <h2 className="card-title">{title}</h2>
-          {subtitle ? <p className="card-subtitle">{subtitle}</p> : null}
-        </div>
-        {right ? <div className="card-right">{right}</div> : null}
-      </div>
-      <div className="card-body">{children}</div>
-    </section>
-  );
-
-  const StatCard = ({ label, main, hint, actions }) => (
-    <div className="stat-card">
-      <div>
-        <div className="stat-label">{label}</div>
-        <div className="stat-main">{main}</div>
-        {hint ? <div className="stat-hint">{hint}</div> : null}
-      </div>
-      {actions ? <div className="stat-actions">{actions}</div> : null}
-    </div>
-  );
 
   return (
     <div className="reports-page">
@@ -199,6 +211,7 @@ useEffect(() => {
               value={vehicleType}
               onChange={(e) => setVehicleType(e.target.value)}
               placeholder="SUV"
+              autoComplete="off"
             />
           </div>
         }
@@ -261,7 +274,9 @@ useEffect(() => {
                             {v.recalls}
                           </Badge>
                         </td>
-                        <td>{v.irv_level ? <Badge variant="neutral">{v.irv_level}</Badge> : <span className="muted">—</span>}</td>
+                        <td>
+                          {v.irv_level ? <Badge variant="neutral">{v.irv_level}</Badge> : <span className="muted">—</span>}
+                        </td>
                         <td className="td-right">
                           <Link className="btn btn-ghost" to={`/vehicles/${v.id}`}>
                             Ver
@@ -297,6 +312,7 @@ useEffect(() => {
                     <button
                       className={`brand-btn ${b.make === brandSelected ? "active" : ""}`}
                       onClick={() => setBrandSelected(b.make)}
+                      type="button"
                     >
                       <span className="muted">#{idx + 1}</span> <b>{b.make}</b>
                     </button>
@@ -317,6 +333,7 @@ useEffect(() => {
                   value={brandSelected}
                   onChange={(e) => setBrandSelected(e.target.value)}
                   placeholder="Toyota"
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -345,10 +362,16 @@ useEffect(() => {
                           <tr key={v.id}>
                             <td>{v.model}</td>
                             <td>{v.year}</td>
-                            <td><Badge variant="neutral">{v.type}</Badge></td>
-                            <td><Badge variant="danger">{v.recalls}</Badge></td>
+                            <td>
+                              <Badge variant="neutral">{v.type}</Badge>
+                            </td>
+                            <td>
+                              <Badge variant="danger">{v.recalls}</Badge>
+                            </td>
                             <td className="td-right">
-                              <Link className="btn btn-ghost" to={`/vehicles/${v.id}`}>Ver</Link>
+                              <Link className="btn btn-ghost" to={`/vehicles/${v.id}`}>
+                                Ver
+                              </Link>
                             </td>
                           </tr>
                         ))}
@@ -371,15 +394,15 @@ useEffect(() => {
         <div className="grid-3">
           <div>
             <label className="label">Tipo</label>
-            <input className="input" value={comboType} onChange={(e) => setComboType(e.target.value)} placeholder="SUV" />
+            <input className="input" value={comboType} onChange={(e) => setComboType(e.target.value)} placeholder="SUV" autoComplete="off" />
           </div>
           <div>
             <label className="label">Marca</label>
-            <input className="input" value={comboMake} onChange={(e) => setComboMake(e.target.value)} placeholder="Toyota" />
+            <input className="input" value={comboMake} onChange={(e) => setComboMake(e.target.value)} placeholder="Toyota" autoComplete="off" />
           </div>
           <div>
             <label className="label">Modelo</label>
-            <input className="input" value={comboModel} onChange={(e) => setComboModel(e.target.value)} placeholder="Supra" />
+            <input className="input" value={comboModel} onChange={(e) => setComboModel(e.target.value)} placeholder="Supra" autoComplete="off" />
           </div>
         </div>
 
