@@ -262,8 +262,6 @@ def safest_vehicle(
             "irv_level": row.irv_level,
         },
     }
-<<<<<<< HEAD
-=======
 
 
 @router.get("/irv-distribution")
@@ -382,4 +380,3 @@ def irv_distribution_user(
             for r in rows
         ]
     }
->>>>>>> 836ddaf (Fix: Corregir rutas de endpoints de reportes (404 error))
