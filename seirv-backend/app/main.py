@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.settings import settings
 from app.database.base import engine, Base
 from app.views import auth, users, vehicles, vehicle_catalog
+from app.routers import reports
 
 # Configurar el logging de SQLAlchemy para reducir logs informativos
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
@@ -44,7 +45,7 @@ app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(users.router, prefix=settings.API_V1_PREFIX)
 app.include_router(vehicles.router, prefix=settings.API_V1_PREFIX)
 app.include_router(vehicle_catalog.router, prefix=settings.API_V1_PREFIX)
-app.include_router(reports.router)
+app.include_router(reports.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")

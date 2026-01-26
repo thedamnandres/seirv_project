@@ -6,8 +6,10 @@ from app.database.base import get_db
 from app.models.vehicle import Vehicle
 from app.models.category import Category
 from app.models.recall import Recall
+from app.models.user import User
+from app.utils.dependencies import get_current_user
 
-router = APIRouter(prefix="/api/v1/reports", tags=["Reports"])
+router = APIRouter(prefix="/reports", tags=["Reports"])
 
 
 @router.get("/least-recalls-by-type")
@@ -260,3 +262,124 @@ def safest_vehicle(
             "irv_level": row.irv_level,
         },
     }
+<<<<<<< HEAD
+=======
+
+
+@router.get("/irv-distribution")
+def irv_distribution(db: Session = Depends(get_db)):
+    """
+    Distribución de vehículos por nivel de IRV.
+    Agrupa por irv_level y calcula conteo + promedio de irv_value.
+    """
+    rows = (
+        db.query(
+            Vehicle.irv_level.label("level"),
+            func.count(Vehicle.id).label("count"),
+            func.avg(Vehicle.irv_value).label("avg_irv"),
+        )
+        .filter(Vehicle.irv_level.isnot(None))
+        .group_by(Vehicle.irv_level)
+        .order_by(Vehicle.irv_level.asc())
+        .all()
+    )
+
+    return {
+        "levels": [
+            {
+                "name": r.level,
+                "count": int(r.count),
+                "avg_irv": round(float(r.avg_irv), 2) if r.avg_irv else 0,
+            }
+            for r in rows
+        ]
+    }
+
+
+@router.get("/available-types")
+def available_types(db: Session = Depends(get_db)):
+    """
+    Lista de tipos de vehículos disponibles (categorías).
+    """
+    rows = (
+        db.query(Category.name)
+        .distinct()
+        .order_by(Category.name.asc())
+        .all()
+    )
+
+    return {
+        "types": [r.name for r in rows]
+    }
+
+
+@router.get("/available-makes")
+def available_makes(db: Session = Depends(get_db)):
+    """
+    Lista de marcas disponibles en los vehículos.
+    """
+    rows = (
+        db.query(Vehicle.make)
+        .distinct()
+        .order_by(Vehicle.make.asc())
+        .all()
+    )
+
+    return {
+        "makes": [r.make for r in rows]
+    }
+
+
+@router.get("/available-models")
+def available_models(
+    make: str | None = Query(None, description="Filtrar por marca"),
+    db: Session = Depends(get_db),
+):
+    """
+    Lista de modelos disponibles, opcionalmente filtrados por marca.
+    """
+    q = db.query(Vehicle.model).distinct()
+
+    if make:
+        q = q.filter(Vehicle.make == make)
+
+    rows = q.order_by(Vehicle.model.asc()).all()
+
+    return {
+        "models": [r.model for r in rows]
+    }
+
+
+@router.get("/irv-distribution-user")
+def irv_distribution_user(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Distribución de vehículos por nivel de IRV para el usuario actual.
+    Solo muestra los vehículos del usuario autenticado.
+    """
+    rows = (
+        db.query(
+            Vehicle.irv_level.label("level"),
+            func.count(Vehicle.id).label("count"),
+            func.avg(Vehicle.irv_value).label("avg_irv"),
+        )
+        .filter(Vehicle.user_id == current_user.id)
+        .filter(Vehicle.irv_level.isnot(None))
+        .group_by(Vehicle.irv_level)
+        .order_by(Vehicle.irv_level.asc())
+        .all()
+    )
+
+    return {
+        "levels": [
+            {
+                "name": r.level,
+                "count": int(r.count),
+                "avg_irv": round(float(r.avg_irv), 2) if r.avg_irv else 0,
+            }
+            for r in rows
+        ]
+    }
+>>>>>>> 836ddaf (Fix: Corregir rutas de endpoints de reportes (404 error))
