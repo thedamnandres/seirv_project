@@ -44,4 +44,33 @@ export const reportsService = {
     const res = await apiClient.get("/reports/safest-vehicle", { params });
     return res.data;
   },
+
+  // 4) Distribución de IRV
+  async getIrvDistribution() {
+    const res = await apiClient.get("/reports/irv-distribution");
+    return res.data;
+  },
+
+  // 4B) Distribución de IRV del usuario autenticado
+  async getIrvDistributionUser() {
+    const res = await apiClient.get("/reports/irv-distribution-user");
+    return res.data;
+  },
+
+  // 5) Opciones para dropdowns
+  async getAvailableTypes() {
+    const res = await apiClient.get("/reports/available-types");
+    return res.data;
+  },
+
+  async getAvailableMakes() {
+    const res = await apiClient.get("/reports/available-makes");
+    return res.data;
+  },
+
+  async getAvailableModels(make = null) {
+    const params = make ? { make } : {};
+    const res = await apiClient.get("/reports/available-models", { params });
+    return res.data;
+  },
 };

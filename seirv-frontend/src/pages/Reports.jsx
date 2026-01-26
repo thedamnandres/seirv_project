@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { reportsService } from "../services/reportsService";
+import "./Reports.scss";
 
 // ================= UI Components (FUERA del componente principal) =================
 const Badge = ({ variant = "neutral", children }) => (
@@ -33,8 +35,17 @@ const StatCard = ({ label, main, hint, actions }) => (
 
 // =============================== PAGE ===============================
 export default function Reports() {
+  // ============= Opciones de dropdowns =============
+  const [availableTypes, setAvailableTypes] = useState([]);
+  const [availableMakes, setAvailableMakes] = useState([]);
+  const [availableModels, setAvailableModels] = useState([]);
+
+  // ============= IRV Distribution =============
+  const [irvData, setIrvData] = useState(null);
+  const [irvLoading, setIrvLoading] = useState(false);
+
   // ============= 1) Por tipo =============
-  const [vehicleType, setVehicleType] = useState("SUV");
+  const [vehicleType, setVehicleType] = useState("");
   const [byType, setByType] = useState(null);
   const [byTypeLoading, setByTypeLoading] = useState(false);
   const [byTypeError, setByTypeError] = useState(null);
@@ -64,6 +75,46 @@ export default function Reports() {
   // Debounce timers (refs, no re-render)
   const debounceTimerBrand = useRef(null);
   const debounceTimerCombo = useRef(null);
+
+  // --------- load: opciones de dropdowns (al montar) ----------
+  useEffect(() => {
+    Promise.all([
+      reportsService.getAvailableTypes(),
+      reportsService.getAvailableMakes(),
+    ])
+      .then(([typesRes, makesRes]) => {
+        setAvailableTypes(typesRes.types || []);
+        setAvailableMakes(makesRes.makes || []);
+        // Auto-seleccionar primer tipo si existe
+        if (typesRes.types?.length && !vehicleType) {
+          setVehicleType(typesRes.types[0]);
+        }
+      })
+      .catch((e) => console.error("Error cargando opciones:", e));
+  }, [vehicleType]);
+
+  // --------- load: modelos cuando cambia marca (combo) ----------
+  useEffect(() => {
+    if (!comboMake) {
+      setAvailableModels([]);
+      return;
+    }
+
+    reportsService
+      .getAvailableModels(comboMake)
+      .then((res) => setAvailableModels(res.models || []))
+      .catch((e) => console.error("Error cargando modelos:", e));
+  }, [comboMake]);
+
+  // --------- load: distribución IRV (al montar) ----------
+  useEffect(() => {
+    setIrvLoading(true);
+    reportsService
+      .getIrvDistributionUser()
+      .then(setIrvData)
+      .catch((e) => console.error("Error cargando IRV:", e))
+      .finally(() => setIrvLoading(false));
+  }, []);
 
   // --------- load: por tipo ----------
   useEffect(() => {
@@ -199,20 +250,94 @@ export default function Reports() {
         </div>
       </div>
 
+      {/* ===================== 0) Distribución IRV ===================== */}
+      <Card
+        title="📊 Distribución de Tus Vehículos por Nivel de IRV"
+        subtitle="Visualiza cómo se distribuyen tus vehículos según su Índice de Riesgo Vehicular."
+      >
+        {irvLoading && <div className="notice">🔄 Cargando datos...</div>}
+        {irvData && irvData.levels && irvData.levels.length > 0 ? (
+          <div className="irv-chart-container">
+            <ResponsiveContainer width="100%" height={350}>
+              <PieChart>
+                <Pie
+                  data={irvData.levels.map((level) => ({
+                    name: level.name,
+                    value: level.count,
+                    avg: level.avg_irv,
+                  }))}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={120}
+                  label={({ name, value, percent }) =>
+                    `${name}: ${value} (${(percent * 100).toFixed(1)}%)`
+                  }
+                >
+                  {irvData.levels.map((level, idx) => {
+                    const colors = {
+                      Bajo: "#28a745",
+                      Medio: "#ffc107",
+                      Alto: "#dc3545",
+                    };
+                    return <Cell key={idx} fill={colors[level.name] || "#6c757d"} />;
+                  })}
+                </Pie>
+                <Tooltip
+                  formatter={(value, name, props) => [
+                    `${value} vehículos (Promedio IRV: ${props.payload.avg})`,
+                    name,
+                  ]}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="irv-summary">
+              {irvData.levels.map((level) => (
+                <div key={level.name} className="irv-summary-item">
+                  <Badge
+                    variant={
+                      level.name === "Bajo"
+                        ? "success"
+                        : level.name === "Medio"
+                        ? "warning"
+                        : "danger"
+                    }
+                  >
+                    {level.name}
+                  </Badge>
+                  <span>
+                    {level.count} vehículos · Promedio IRV: {level.avg_irv}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          !irvLoading && <div className="notice muted">No hay datos de IRV disponibles.</div>
+        )}
+      </Card>
+
       {/* ===================== 1) Tipo ===================== */}
       <Card
-        title="1) Por tipo"
+        title="TIPO"
         subtitle="Filtra por categoría (SUV, Sedan, etc.) y revisa todos los vehículos ordenados por recalls."
         right={
           <div className="inline">
             <label className="label">Tipo</label>
-            <input
+            <select
               className="input"
               value={vehicleType}
               onChange={(e) => setVehicleType(e.target.value)}
-              placeholder="SUV"
-              autoComplete="off"
-            />
+            >
+              <option value="">-- Seleccionar --</option>
+              {availableTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
           </div>
         }
       >
@@ -294,7 +419,7 @@ export default function Reports() {
 
       {/* ===================== 2) Marca ===================== */}
       <Card
-        title="2) Por marca"
+        title="MARCA"
         subtitle="Identifica marcas con más recalls y cuáles vehículos de esa marca concentran más incidentes."
       >
         <div className="grid-2">
@@ -325,17 +450,7 @@ export default function Reports() {
 
           <div className="panel">
             <div className="panel-head">
-              <h3 className="panel-title">Vehículos más recallados de la marca</h3>
-              <div className="inline">
-                <label className="label">Marca</label>
-                <input
-                  className="input"
-                  value={brandSelected}
-                  onChange={(e) => setBrandSelected(e.target.value)}
-                  placeholder="Toyota"
-                  autoComplete="off"
-                />
-              </div>
+              <h3 className="panel-title">Vehículos con más recalls por marca</h3>
             </div>
 
             {worstLoading && <div className="notice">🔄 Cargando…</div>}
@@ -387,22 +502,43 @@ export default function Reports() {
 
       {/* ===================== 3) Combinado ===================== */}
       <Card
-        title="3) Combinado: carro más seguro"
+        title="CARRO MAS SEGURO"
         subtitle="Aplica cualquier combinación de filtros (tipo, marca, modelo). El sistema devuelve el vehículo con menos recalls."
         right={<Badge variant="info">Auto-update</Badge>}
       >
         <div className="grid-3">
           <div>
             <label className="label">Tipo</label>
-            <input className="input" value={comboType} onChange={(e) => setComboType(e.target.value)} placeholder="SUV" autoComplete="off" />
+            <select className="input" value={comboType} onChange={(e) => setComboType(e.target.value)}>
+              <option value="">-- Todos --</option>
+              {availableTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="label">Marca</label>
-            <input className="input" value={comboMake} onChange={(e) => setComboMake(e.target.value)} placeholder="Toyota" autoComplete="off" />
+            <select className="input" value={comboMake} onChange={(e) => setComboMake(e.target.value)}>
+              <option value="">-- Todos --</option>
+              {availableMakes.map((make) => (
+                <option key={make} value={make}>
+                  {make}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="label">Modelo</label>
-            <input className="input" value={comboModel} onChange={(e) => setComboModel(e.target.value)} placeholder="Supra" autoComplete="off" />
+            <select className="input" value={comboModel} onChange={(e) => setComboModel(e.target.value)} disabled={!comboMake}>
+              <option value="">-- Todos --</option>
+              {availableModels.map((model) => (
+                <option key={model} value={model}>
+                  {model}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
