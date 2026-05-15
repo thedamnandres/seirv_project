@@ -1,0 +1,114 @@
+version: 2.1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEIRV – Pipeline de integración continua
+#
+# Jobs activos:
+#   backend-deps     → instala deps Python y verifica que requirements.txt resuelva
+#   frontend-lint    → ESLint sobre seirv-frontend/
+#   frontend-test    → Vitest (modo run, sin watcher)
+#   frontend-build   → vite build con VITE_API_URL configurable
+#
+# Jobs sugeridos para agregar cuando estén listos:
+#   backend-lint     → pip install ruff && ruff check seirv-backend/
+#   backend-test     → pytest seirv-backend/tests/ (requiere tests escritos + DB)
+#
+# Variables de entorno necesarias en CircleCI Project Settings:
+#   VITE_API_URL     → URL pública del backend (ej. https://api.tu-dominio.com/api/v1)
+#   (las demás solo se necesitan si activas integration tests con DB real)
+# ─────────────────────────────────────────────────────────────────────────────
+
+orbs:
+  node: circleci/node@6.3.0
+  python: circleci/python@2.1.1
+
+# ── Definición de jobs ────────────────────────────────────────────────────────
+
+jobs:
+  # ── Backend: verificación de dependencias ───────────────────────────────────
+  backend-deps:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - pip-v1-{{ checksum "seirv-backend/requirements.txt" }}
+            - pip-v1-
+      - run:
+          name: Instalar dependencias Python
+          working_directory: seirv-backend
+          command: pip install --no-cache-dir -r requirements.txt
+      - save_cache:
+          key: pip-v1-{{ checksum "seirv-backend/requirements.txt" }}
+          paths:
+            - ~/.cache/pip
+
+  # ── Frontend: lint ───────────────────────────────────────────────────────────
+  frontend-lint:
+    docker:
+      - image: cimg/node:20.19
+    steps:
+      - checkout
+      - node/install-packages:
+          app-dir: seirv-frontend
+          pkg-manager: npm
+      - run:
+          name: Lint (ESLint)
+          working_directory: seirv-frontend
+          command: npm run lint
+
+  # ── Frontend: tests unitarios ────────────────────────────────────────────────
+  frontend-test:
+    docker:
+      - image: cimg/node:20.19
+    steps:
+      - checkout
+      - node/install-packages:
+          app-dir: seirv-frontend
+          pkg-manager: npm
+      - run:
+          name: Tests unitarios (Vitest)
+          working_directory: seirv-frontend
+          # --run evita el modo watch; CI=true lo haría igual pero lo forzamos explícitamente
+          command: npm test -- --run
+
+  # ── Frontend: build de producción ────────────────────────────────────────────
+  frontend-build:
+    docker:
+      - image: cimg/node:20.19
+    steps:
+      - checkout
+      - node/install-packages:
+          app-dir: seirv-frontend
+          pkg-manager: npm
+      - run:
+          name: Build producción (Vite)
+          working_directory: seirv-frontend
+          command: npm run build
+          environment:
+            # Sobrescribir en Project Settings con la URL real del backend
+            VITE_API_URL: http://localhost:8000/api/v1
+      - store_artifacts:
+          path: seirv-frontend/dist
+          destination: frontend-dist
+
+# ── Workflow ──────────────────────────────────────────────────────────────────
+
+workflows:
+  pipeline:
+    jobs:
+      # Backend corre en paralelo con todo el frontend
+      - backend-deps
+
+      # Lint primero; si falla no tiene sentido correr test ni build
+      - frontend-lint
+
+      - frontend-test:
+          requires:
+            - frontend-lint
+
+      # Build solo si los tests pasan
+      - frontend-build:
+          requires:
+            - frontend-test
