@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z postgres-service 5432; do
+                echo "Esperando postgres..."; sleep 3
+              done
+              echo "postgres listo"
+      containers:
+        - name: backend
+          image: seirv-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: seirv-secrets
+                  key: DATABASE_URL
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: seirv-secrets
+                  key: SECRET_KEY
+            - name: ACCESS_TOKEN_EXPIRE_MINUTES
+              valueFrom:
+                secretKeyRef:
+                  name: seirv-secrets
+                  key: ACCESS_TOKEN_EXPIRE_MINUTES
+            - name: API_V1_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  name: seirv-config
+                  key: API_V1_PREFIX
+            - name: DEBUG
+              valueFrom:
+                configMapKeyRef:
+                  name: seirv-config
+                  key: DEBUG
+            - name: ALGORITHM
+              valueFrom:
+                configMapKeyRef:
+                  name: seirv-config
+                  key: ALGORITHM
+            - name: PYTHONPATH
+              valueFrom:
+                configMapKeyRef:
+                  name: seirv-config
+                  key: PYTHONPATH
+            - name: CORS_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: seirv-config
+                  key: CORS_ORIGINS
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  labels:
+    app: backend
+spec:
+  type: NodePort
+  selector:
+    app: backend
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30800
